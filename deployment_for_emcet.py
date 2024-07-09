@@ -4,8 +4,10 @@ import numpy as np
 import pickle
 import openpyxl
 
+model_path = os.path.join(os.getcwd(), 'rfr_model.sav')  # Adjust as per your file location
+
 # Load the trained model
-loaded_model = pickle.load(open('rfr_model.sav', 'rb'))
+loaded_model = pickle.load(open(model_path, 'rb'))
 
 # Load the dataset
 df = pd.read_excel('modified_2022.xlsx')

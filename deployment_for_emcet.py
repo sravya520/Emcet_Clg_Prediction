@@ -45,7 +45,7 @@ def predict_colleges(input_rank, input_gender, input_caste):
     top_5_indices = distances.nsmallest(5).index
     top_5_colleges = df_filtered.loc[top_5_indices]
 
-    return top_5_colleges
+    return top_5_colleges[['inst_name', 'branch_code']]
 
 # Streamlit UI
 st.title('College Recommendation System')

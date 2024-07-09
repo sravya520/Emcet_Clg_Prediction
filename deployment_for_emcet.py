@@ -1,14 +1,16 @@
+
+# app.py
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
-import openpyxl
 
 # Load the trained model
 loaded_model = pickle.load(open('rfr_model.sav', 'rb'))
 
 # Load the dataset
-df = pd.read_excel('modified_2022.xlsx')
+df = pd.read_excel('/content/modified_2022.xlsx')
 
 # Define rank columns dictionary
 rank_columns = {
@@ -44,8 +46,9 @@ def predict_colleges(input_rank, input_gender, input_caste):
     distances = np.abs(df_filtered[relevant_columns].min(axis=1) - input_rank)
     top_5_indices = distances.nsmallest(5).index
     top_5_colleges = df_filtered.loc[top_5_indices]
-
-    return top_5_colleges[['inst_name', 'branch_code']]
+    top_5_colleges ['inst_name'] = top_5_colleges ['inst_name'].str.replace('"', '').str.strip()
+    top_5_colleges = top_5_colleges .to_string(index=False)
+    return top_5_colleges
 
 # Streamlit UI
 st.title('College Recommendation System')

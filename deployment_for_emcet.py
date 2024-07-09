@@ -5,8 +5,7 @@ import pickle
 import requests
 
 # Load the dataset from GitHub
-url = "modified_2022.xlsx"
-df = pd.read_excel(url)
+df = "modified_2022.xlsx"
 
 # Load the trained model from GitHub
 

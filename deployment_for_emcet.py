@@ -7,7 +7,7 @@ import pickle
 loaded_model = pickle.load(open('rfr_model.sav', 'rb'))
 
 # Load the dataset
-df = pd.read_excel('/content/modified_2022.xlsx')
+df = pd.read_excel('modified_2022.xlsx')
 
 # Define rank columns dictionary
 rank_columns = {

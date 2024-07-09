@@ -5,12 +5,13 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import openpyxl
 
 # Load the trained model
 loaded_model = pickle.load(open('rfr_model.sav', 'rb'))
 
 # Load the dataset
-df = pd.read_excel('/content/modified_2022.xlsx')
+df = pd.read_excel('modified_2022.xlsx')
 
 # Define rank columns dictionary
 rank_columns = {

@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from PIL import Image
 import pickle
 import openpyxl
 
@@ -51,7 +50,6 @@ def predict_colleges(input_rank, input_gender, input_caste):
 # Streamlit UI
 st.title('College Recommendation System')
 st.markdown("By Dangeti Sravya")
-image = Image.open("College.jpg")
 
 # Input form
 input_rank = st.number_input('Enter your rank:', min_value=1, max_value=10000000, step=1)

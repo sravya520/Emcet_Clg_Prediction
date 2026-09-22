@@ -470,3 +470,42 @@ def test_options_are_still_most_competitive_first_within_a_band():
     result = tools.recommend_options(34_000, "OC", "BOYS", "AU", branch=["CSE"], per_band=5)
     safe = [o["closing_rank"] for o in result["options"] if o["band"] == "Safe"]
     assert safe == sorted(safe)
+
+
+def test_official_region_names_are_not_treated_as_invented(real_result):
+    """AU and SVU are defined by name in the reservation G.O., not invented."""
+    answer = Answer(reply="Are you in the AU (Andhra University) or SVU (Sri Venkateswara University) region?")
+    checked = verify.check(answer, [real_result])
+    assert "Andhra University" in checked.answer.reply
+    assert "Sri Venkateswara University" in checked.answer.reply
+
+
+def test_a_region_name_cannot_smuggle_in_a_college(real_result):
+    """'Andhra University' is allowed exactly, never as a prefix for a college."""
+    answer = Answer(reply="Try Andhra University College of Engineering for CSE.")
+    checked = verify.check(answer, [real_result])
+    assert "Andhra University College of Engineering" not in checked.answer.reply
+    assert not checked.passed_clean
+
+
+def test_numbers_printed_inside_a_tool_sentence_are_trusted():
+    """explain_bands says tested_on '2024->2025'. The model must be able to
+    mention 2024 without the checker calling it an invention."""
+    bands = tools.explain_bands()
+    answer = Answer(reply="These were measured on 2024 to 2025 transitions.")
+    checked = verify.check(answer, [bands])
+    assert "2024" in checked.answer.reply
+    assert checked.passed_clean, checked.removed
+
+
+def test_indian_lakh_grouping_is_read_correctly(real_result):
+    """Gemini writes 1,51,961 not 151,961. Both must resolve to the same number."""
+    details = tools.get_option_details("ADIT", "CSE")
+    ranks = [r["closing_rank"] for r in details["closing_ranks"] if r["closing_rank"] > 100000]
+    assert ranks, "need a six-figure cutoff for this test"
+    value = ranks[0]
+    indian = f"{value:,}".replace(",", "")  # rebuild in lakh grouping
+    indian = indian[:-3][:-2] + "," + indian[:-3][-2:] + "," + indian[-3:]
+    answer = Answer(reply=f"That one closed at {indian}.")
+    checked = verify.check(answer, [details])
+    assert indian in checked.answer.reply, checked.removed

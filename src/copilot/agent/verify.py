@@ -93,6 +93,17 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
                 walk(child, key)
         elif isinstance(node, str):
             words.update(re.findall(r"[A-Za-z0-9]+", node.upper()))
+            # Numbers a tool printed INSIDE a sentence are still numbers the
+            # tool vouched for. Without this, explain_bands saying it was
+            # "tested_on: 2024->2025" left the model unable to mention 2024,
+            # and the checker stripped a year that came straight from a tool.
+            for token in NUMBER_PATTERN.findall(node):
+                value = _as_int(token)
+                if value is None:
+                    continue
+                numbers.add(value)
+                if 1900 <= value <= 2100:
+                    years.add(value)
             if key in ("college_name", "branch_name"):
                 names.add(_normalise_name(node))
             if key == "college_code":
@@ -135,10 +146,25 @@ def _normalise_name(text: str) -> str:
     return " ".join(re.findall(r"[A-Z0-9]+", str(text).upper()))
 
 
+#: Names that belong to the exam's own vocabulary rather than being claims
+#: about a particular college. The two AP local areas are defined by name in
+#: G.O.MS.No. 20 dated 12-05-2025, so quoting them is not a fabrication.
+#:
+#: Matched EXACTLY, never as a substring. Otherwise an invented
+#: "Andhra University College of Engineering" would ride in on the back of a
+#: term that is only meant to name a region.
+DOMAIN_NAMES = {
+    "ANDHRA UNIVERSITY",
+    "SRI VENKATESWARA UNIVERSITY",
+}
+
+
 def _name_is_vouched(phrase: str, names: set[str]) -> bool:
     """True when this phrase is part of, or contains, a name a tool returned."""
     candidate = _normalise_name(phrase)
     if not candidate:
+        return True
+    if candidate in DOMAIN_NAMES:
         return True
     return any(candidate in name or name in candidate for name in names)
 

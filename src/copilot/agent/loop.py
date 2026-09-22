@@ -87,6 +87,27 @@ class TransientAPIError(RuntimeError):
     """A failure worth retrying: rate limit, timeout, server error."""
 
 
+def _use_os_trust_store() -> bool:
+    """Trust the machine's own certificate store as well as the bundled one.
+
+    Networks that inspect TLS - college wifi, office proxies, some antivirus -
+    re-sign every connection with their own certificate authority. That CA is
+    installed in the operating system, but Python ships its own separate bundle
+    and does not see it, so the SDK fails with CERTIFICATE_VERIFY_FAILED on a
+    machine where the browser works fine.
+
+    This is not a way of skipping certificate checks. Certificates are still
+    verified; we just also consult the store the rest of the machine uses.
+    """
+    try:
+        import truststore
+
+        truststore.inject_into_ssl()
+        return True
+    except Exception:  # noqa: BLE001 - absence is fine, the default bundle stands
+        return False
+
+
 @dataclass
 class Turn:
     """Everything that happened while answering one question."""
@@ -117,6 +138,7 @@ class GeminiClient:
     def __init__(self, api_key: str | None = None, model: str | None = None):
         if api_key is None or model is None:
             api_key, model = config.require_llm_settings()
+        _use_os_trust_store()
         from google import genai  # imported here so tests need no SDK key
 
         self._genai = genai

@@ -11,5 +11,6 @@ google-genai>=2.0  # Gemini SDK. The loop is ours; the SDK only carries messages
 pydantic>=2.0      # the answer schema
 tenacity>=9.0      # retries on transient API errors
 python-dotenv>=1.0 # reads .env
+truststore>=0.9    # trust the OS cert store too, for TLS-inspecting networks
 
 pytest>=8.0

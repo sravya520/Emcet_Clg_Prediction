@@ -33,7 +33,10 @@
       "doc_title": "APEAPCET-2023[ M P C STREAM] LAST RANK DETAILS",
       "counselling_phase": "end_of_web_counselling",
       "phase_stated_in_doc": false,
-      "notes": "Schema variant B: INSTCODE/NAME OF THE INSTITUTION/TYPE, AFFL., A_REG, no Local_Area, 18 category-gender columns, COLLFEE present."
+      "notes": "Schema variant B: INSTCODE/NAME OF THE INSTITUTION/TYPE, AFFL., A_REG, no Local_Area, 18 category-gender columns, COLLFEE present. Column 30 (COLLFEE) extracts with a blank header cell, so it is named explicitly via header_overrides; without it the fee column is silently lost.",
+      "header_overrides": {
+        "30": "COLLFEE"
+      }
     },
     {
       "id": "ap_eapcet_2024_mpc_lastrank",

@@ -1,0 +1,78 @@
+branch_code,branch_name,name_status,confidence,notes
+AGR,Agricultural Engineering,unofficial,high,
+AI,Artificial Intelligence,unofficial,high,
+AID,Artificial Intelligence and Data Science,unofficial,high,
+AIM,Artificial Intelligence and Machine Learning,unofficial,high,
+ASE,Aerospace Engineering,unofficial,medium,May instead be Aeronautical Engineering.
+AUT,Automobile Engineering,unofficial,high,
+BDT,,unofficial,low,Code not identified. UI shows the raw code.
+BIO,Bio-Technology,unofficial,high,
+CAD,Computer Science and Engineering (AI and Data Science),unofficial,medium,Inferred from the C- prefix pattern used for CSE specialisations.
+CAI,Computer Science and Engineering (Artificial Intelligence),unofficial,medium,Inferred from the C- prefix pattern.
+CBA,,unofficial,low,Code not identified. UI shows the raw code.
+CBC,,unofficial,low,Code not identified. UI shows the raw code.
+CCC,,unofficial,low,Code not identified. UI shows the raw code.
+CDA,,unofficial,low,Code not identified. UI shows the raw code.
+CHE,Chemical Engineering,unofficial,high,
+CIA,,unofficial,low,Code not identified. UI shows the raw code.
+CIC,Computer Science and Engineering (IoT and Cyber Security incl. Blockchain),unofficial,medium,Long-form title inferred; specialisation wording may differ.
+CIT,Computer and Information Technology,unofficial,medium,
+CIV,Civil Engineering,unofficial,high,
+CN,,unofficial,low,Possibly Computer Networks; not confirmed.
+COS,,unofficial,low,Code not identified. Appears in 2023 only.
+CS,Computer Science,unofficial,medium,Distinct from CSE in the source; exact title unconfirmed.
+CSB,,unofficial,low,Code not identified. Distinct from CSBS.
+CSBS,Computer Science and Business Systems,unofficial,high,
+CSC,Computer Science and Engineering (Cyber Security),unofficial,medium,Inferred from the C- prefix pattern.
+CSD,Computer Science and Engineering (Data Science),unofficial,high,
+CSE,Computer Science and Engineering,unofficial,high,
+CSEB,,unofficial,low,Code not identified. UI shows the raw code.
+CSED,,unofficial,low,Code not identified. Appears in 2025 only.
+CSER,,unofficial,low,Code not identified. Absent from 2025.
+CSG,,unofficial,low,Code not identified. UI shows the raw code.
+CSM,Computer Science and Engineering (AI and Machine Learning),unofficial,high,Widely used AP EAPCET code for the CSE AI&ML specialisation.
+CSN,,unofficial,low,Possibly a CSE networks specialisation; not confirmed. 2023 only.
+CSO,,unofficial,low,Code not identified. UI shows the raw code.
+CSS,,unofficial,low,Code not identified. UI shows the raw code.
+CST,,unofficial,low,Code not identified. UI shows the raw code.
+CSW,,unofficial,low,Code not identified. UI shows the raw code.
+DS,Data Science,unofficial,medium,
+DTD,,unofficial,low,Possibly Dairy Technology; not confirmed. 2025 only.
+EBM,,unofficial,low,Code not identified. UI shows the raw code.
+ECA,,unofficial,low,Code not identified. Absent from 2025.
+ECE,Electronics and Communication Engineering,unofficial,high,
+ECES,,unofficial,low,Code not identified. UI shows the raw code.
+ECM,,unofficial,low,Code not identified. UI shows the raw code.
+ECT,,unofficial,low,Code not identified. UI shows the raw code.
+ECV,,unofficial,low,Code not identified. UI shows the raw code.
+EEE,Electrical and Electronics Engineering,unofficial,high,
+EIE,Electronics and Instrumentation Engineering,unofficial,high,
+EII,,unofficial,low,Code not identified. UI shows the raw code.
+ENV,Environmental Engineering,unofficial,medium,
+EVT,,unofficial,low,Code not identified. UI shows the raw code.
+FDE,,unofficial,low,Code not identified. UI shows the raw code.
+FDT,Food Technology,unofficial,medium,
+GDT,,unofficial,low,Code not identified. UI shows the raw code.
+GIN,,unofficial,low,Code not identified. UI shows the raw code.
+INF,Information Technology,unofficial,high,
+IOT,Internet of Things,unofficial,high,
+IST,,unofficial,low,Possibly Information Science and Technology; not confirmed.
+MAD,,unofficial,low,Code not identified. UI shows the raw code.
+MAU,,unofficial,low,Code not identified. UI shows the raw code.
+MEC,Mechanical Engineering,unofficial,high,
+MET,Metallurgical Engineering,unofficial,medium,
+MII,,unofficial,low,Code not identified. UI shows the raw code.
+MIN,Mining Engineering,unofficial,medium,
+MMM,,unofficial,low,Code not identified. UI shows the raw code.
+MMT,,unofficial,low,Code not identified. UI shows the raw code.
+MRB,,unofficial,low,Possibly a robotics specialisation; not confirmed.
+NAM,Naval Architecture and Marine Engineering,unofficial,medium,
+PEE,,unofficial,low,Code not identified. Distinct from PET.
+PET,Petroleum Engineering,unofficial,medium,
+PHD,Pharm.D,unofficial,high,Doctor of Pharmacy. Not a doctoral research degree.
+PHE,,unofficial,low,Code not identified. UI shows the raw code.
+PHM,B.Pharmacy,unofficial,high,
+PLG,,unofficial,low,Possibly Planning (B.Plan); not confirmed.
+QC,,unofficial,low,Code not identified. Appears in 2025 only.
+RBT,Robotics,unofficial,medium,
+SWE,Software Engineering,unofficial,medium,

@@ -174,28 +174,42 @@ This is the real engineering work in Phase 1.
 
 1,314 matched pairs × ~9 categories × 2 genders is a solid backtest base.
 
-### 5.5 Fee data — **dropped from the MVP** (decided 2026-09-22)
+### 5.5 Fee data — investigated again in Phase 1
 
-`COLLFEE` is **inside** the 2022–2024 rank statements (e.g. ₹43,000 / ₹53,500). **2025 has
-no fee column.** Fees are set by AFRC / APHERMC for a 3-year block period, but
-`afrc.ap.gov.in` was unreachable on 2026-09-22 (tested repeatedly, http and https) and the
-Internet Archive was offline the same day, so the block period could not be confirmed from
-an official source.
+**What the official rule says.** The AP Higher Education Regulatory and Monitoring
+Commission (APHERMC, the body that replaced AFRC) publishes its fee guidelines at
+`aphermc.ap.gov.in`. The document
+[`APHERMC_GUIDELINES_2023-26_30.06.2022.pdf`](https://aphermc.ap.gov.in/Doc2023-26/APHERMC_GUIDELINES_2023-26_30.06.2022.pdf)
+states, in its own title, that it governs
 
-**Decision: fee is out of the MVP product surface.** Recommendations are built on 2025
-data; showing a 2024 fee beside a 2025 closing rank is exactly the quiet year-mixing this
-project exists to avoid, and we cannot source a 2025 fee honestly.
+> "the Fee Structure by the Commission for the **block period 2023-24 to 2025-26**".
 
-Consequences, accepted:
-- No `budget` input. No budget filter. User story #2 is re-pointed at `district` /
-  `college_type`, which 2025 *does* carry.
-- Fee never appears in any answer, so it is not part of the fabrication-check surface.
-- `fee_inr` is still **ingested** for 2022–2024, because it is in the source and faithful
-  parsing is cheap. Nothing reads it. If an official 2025 fee notification turns up later,
-  restoring the feature is a data task, not a refactor.
+So yes — the official fee order is a multi-year order and it **does cover 2025-26**.
 
-This is a real product loss — fee is a top concern for AP families — taken deliberately in
-favour of the data-honesty rule.
+**What the data shows.** That does not mean a college's fee is constant across the
+block. Comparing the fee column of the 2023 and 2024 statements, for the 250 colleges
+that appear in both:
+
+| | |
+|---|---|
+| Fee identical in 2023 and 2024 | **138 colleges (55.2%)** |
+| Fee changed inside the same block period | **112 colleges (44.8%)** |
+
+Some changes are large: `APUCPU` 50,000 -> 99,500; `ANIL` 59,950 -> 84,100;
+`ACPS` 62,400 -> 38,000. This is consistent with APHERMC's own publication list, which
+carries dozens of per-institution fee-fixation orders *inside* the block
+(`B.Tech_G O Ms No 18_2024-25.pdf`, `B.Tech_G O Ms No 23_2024-25.pdf`, and so on).
+
+**Conclusion.** The block period covers 2025, but "the block covers 2025" does not
+license "the 2024 fee is the 2025 fee" — that inference is wrong for roughly 45% of
+colleges, sometimes by 100%. Carrying a 2024 fee into a 2025 recommendation would put a
+plausible, official-looking, wrong number in front of a family making a money decision.
+
+**Fee therefore stays out of the MVP product surface** (see Q1). `fee_inr` is still
+ingested for 2022-2024 because it is in the source; nothing reads it. A per-college fee
+list for 2025-26 would resolve this properly; none was found on `aphermc.ap.gov.in`
+(the block-period spreadsheet there is a blank submission template, not a fee schedule)
+and `afrc.ap.gov.in` remains unreachable.
 
 ### 5.6 The official disclaimer (stored verbatim in `sources.json`)
 
@@ -208,6 +222,58 @@ Recorded because it constrains the product, not just the docs:
   explicitly.*
 - The statement **must not be read as the rank up to which a seat can be allotted**.
 - **"Girls are also eligible for Boys seats."** → a concrete eligibility rule (§7.1).
+
+### 5.7 Local area (AU / SVU / OU) across the four years
+
+Checked because the column moves and renames between years.
+
+**OU never appears, and never should.** The official reservation order
+[`2026_LocalNonlocalReservation.pdf`](https://cets.apsche.ap.gov.in/apsche/PDF/2026_LocalNonlocalReservation.pdf)
+(G.O.MS.No. 20, dated 12-05-2025) defines exactly two local areas for Andhra Pradesh:
+"(a) Andhra University Area" and "(b) Sri Venkateswara University Area". The word
+"Osmania" does not occur in the document — OU is Telangana, and after the 2014
+bifurcation it is not an AP local area. The pipeline asserts this: a validation check
+fails if any value other than AU or SVU ever appears.
+
+| Year | Column name | Populated? | Handling |
+|---|---|---|---|
+| 2022 | `Local_Area` | **Only for state-wide (SW) colleges** | Blank rows fall back to the college's own region, flagged `local_area_derived = true` (93.7% of 2022 rows) |
+| 2023 | `A_REG` | All rows | Used directly |
+| 2024 | `A_REG` | All rows | Used directly |
+| 2025 | `Local_area` | All rows | Used directly |
+
+So the column **did change** — twice in name (`Local_Area` -> `A_REG` -> `Local_area`)
+and once in meaning (2022 populates it only for state-wide colleges). Two separate
+fields are involved and must not be confused:
+
+- `inst_region` — where the *college* sits: AU, SVU, or **SW** (state-wide). The 2024
+  statement documents `SW` in its own footnote: *"Inst_reg 'SW' means State wide"*.
+- `local_area` — which *applicant* region the row's ranks apply to. A state-wide college
+  gets two rows, one for AU applicants and one for SVU applicants.
+
+For a state-wide college with no local area given, the value stays **null**; we never
+guess a region.
+
+### 5.8 Branch names — no official list exists
+
+Searched for an official branch-code-to-name table in:
+
+- all four last-rank statements (no legend page in any of them),
+- the 2026 MPC third-and-final-phase detailed notification (`cap.apcfss.in`),
+- the 2026 engineering instruction booklet (`cets.apsche.ap.gov.in`),
+- the official APSCHE "Courses" page — which lists only broad streams
+  (Engineering, Bio-Technology, B.Pharmacy...), never codes.
+
+The counselling portal's own front-end does carry a `branch_name` field, but it is a
+JavaScript single-page app with no public API: every `/api/...` path returns the app's
+HTML shell (`Content-Type: text/html`), not data.
+
+**Conclusion: no official source. Every branch name in this project is therefore marked
+`name_status = unofficial` in `data/mappings/branch_map.csv`**, with a `confidence`
+column. Where confidence is low the name is left **blank** rather than invented, and the
+UI shows the raw code. 77 codes total: 16 high confidence, 14 medium, 47 blank. The
+named codes cover about 95% of all rows, because the unnamed ones are rare branches.
+
 
 ## 6. Data model
 
@@ -283,6 +349,25 @@ out at 95% the bands would be meaningless.
 **This is the honest, measurable core of the project.** Tuning on Fold A and validating on
 Fold B, with SC exclusion stated, is what makes it defensible in an interview.
 
+### 7.4 Required disclosure for SC students (non-negotiable)
+
+Because 2025 replaced SC with SC-I / SC-II / SC-III, the 2024 -> 2025 validation fold
+cannot test SC at all. The Safe / Moderate / Reach thresholds are therefore **tuned on
+SC data from 2023 -> 2024, but never validated on held-out SC data**.
+
+**The app must tell SC students this, every time.** Whenever the selected category is
+SC, SC-I, SC-II or SC-III, the results screen and the chat answer must both carry a
+visible line to the effect of:
+
+> "Heads up: the Safe / Moderate / Reach grouping could not be tested for SC categories.
+> In 2025 the state split SC into SC-I, SC-II and SC-III, so last year's SC results
+> cannot be compared like-for-like. Treat these groupings as less reliable than the
+> ones shown for other categories."
+
+This is a product requirement, not a nice-to-have: an untested band presented with the
+same confidence as a tested one is exactly the kind of quiet overclaim this project
+exists to avoid. It gets its own eval case in Phase 4.
+
 ## 8. Phase 3 — Agent layer *(plan, for approval)*
 
 - **Framework-free tool-calling loop** over Gemini function calling. Max **6** iterations,
@@ -340,10 +425,13 @@ the source explicitly excludes · placements (no official source exists).
 
 ### Resolved (2026-09-22)
 
-**Q1 — 2025 fee. → Fee dropped from the MVP.** The 2025 statement has no fee column and no
-official 2025 fee notification could be retrieved. Rather than mix a 2024 fee into a
-2025 recommendation, fee and the budget filter are out of scope. Full reasoning and
-accepted consequences in §5.5.
+**Q1 — 2025 fee. → Fee stays out of the MVP, now with evidence.** Re-investigated in
+Phase 1. The official APHERMC order *is* a multi-year order covering the block period
+**2023-24 to 2025-26**, so it formally covers 2025. But the fee actually changed for
+**44.8% of colleges between 2023 and 2024 inside that same block**, sometimes by 100%.
+"Block covers 2025" therefore does not justify "2024 fee = 2025 fee". Full working in
+§5.5. Awaiting Sravya's confirmation, since the original instruction was to keep fees if
+the order spans several years.
 
 **Q2 — Backtest pairing. → Two folds.** Tune `t1,t2,t3` on Fold A (2023→2024, all
 categories comparable); validate on held-out Fold B (2024→2025, SC excluded and reported).
@@ -352,16 +440,22 @@ See §7.3.
 **Q4 — NAAC/NBA. → Out of MVP scope.** Needs a naac.gov.in scrape plus fuzzy college-name
 matching; roughly half a day and prone to silent wrong joins. Listed under §10 Later.
 
+### Resolved in Phase 1 (2026-09-22)
+
+**Branch names -> unofficial.** No official code-to-name list exists in any counselling
+document (§5.8). All names are marked `unofficial`; low-confidence codes are left blank
+rather than guessed.
+
+**Local area -> AU and SVU only, and the column moved.** `Local_Area` -> `A_REG` ->
+`Local_area` across the four years, and 2022 populates it only for state-wide colleges
+(§5.7). OU is Telangana and a validation check fails if it ever appears.
+
+**SC disclosure -> required in the UI and in chat answers** whenever the category is SC
+or an SC sub-category (§7.4).
+
+**Q5 (branch-name source) -> closed** by §5.8.
+
 ### Still open
 
-**Q3 — Commit identity.** Git had no identity configured. I set it repo-locally to
-`Sravya <raghu.ic3@gmail.com>`. If the GitHub account uses a different email, these commits
-will not attribute on GitHub — say the word and I will amend both commits.
-
-**Q5 — Branch-name source.** The statements carry branch *codes* only (`CSM`, `CSD`, `AID`,
-`CIC`…), not full names. 73 distinct codes in 2025. Expanding them to readable names
-("CSM → CSE (AI & ML)") needs a mapping that is hand-written and reviewed, since no
-official code→name table was found alongside the statements. Planned as
-`branch_map.csv`, checked into git and reviewed by hand — flagged here because the
-*expansions themselves* are my inference, not sourced data, and the UI should not present
-them as official.
+**Q6 — Fee, final call.** See Q1 above. Default is to leave fee out; one word from
+Sravya flips it back on.

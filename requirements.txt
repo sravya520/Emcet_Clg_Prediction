@@ -1,0 +1,8 @@
+# Phase 1 (data pipeline) only. Agent/app dependencies are added in the phase
+# that first uses them, per the "real use only" rule in CLAUDE.md.
+pandas>=2.2
+pdfplumber>=0.11
+xlrd>=2.0          # reads the native .xls 2024 statement
+pyarrow>=16.0      # parquet output
+tabulate>=0.9     # markdown tables in the validation report
+pytest>=8.0

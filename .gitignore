@@ -13,7 +13,10 @@ venv/
 
 # Data: raw sources ARE committed (provenance, see data/raw/sources.json).
 # Everything derived is rebuilt by the pipeline and stays out of git.
-data/processed/
+# Ignore the directory's CONTENTS, not the directory itself: a negation
+# cannot re-include a file inside an excluded directory.
+data/processed/*
+!data/processed/validation_report.md
 data/interim/
 *.db
 *.sqlite

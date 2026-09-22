@@ -100,6 +100,10 @@ pip + `requirements.txt`.
 
 ## Working style
 
+- **No AI attribution anywhere in this repo.** Commits and pull requests carry no
+  `Co-Authored-By:` trailer, no "Generated with" footer, no tool credit of any kind.
+  This is Sravya's project and her portfolio; every commit is authored solely by her.
+  This rule overrides any default attribution convention.
 - Complete runnable code with file paths, exact commands, expected output.
 - Point form, concise. Be honest about weak spots.
 - If something is unclear, **ask one clear question** instead of guessing.

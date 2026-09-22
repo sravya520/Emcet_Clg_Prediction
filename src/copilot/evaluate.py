@@ -134,6 +134,22 @@ def run_case(case: dict, client: GeminiClient) -> CaseResult:
     return result
 
 
+def _error_kinds(failed: list[CaseResult]) -> dict:
+    kinds: dict[str, int] = {}
+    for result in failed:
+        text = result.error or ""
+        if "429" in text or "RESOURCE_EXHAUSTED" in text:
+            key = "rate_limited_429"
+        elif "401" in text or "UNAUTHENTICATED" in text:
+            key = "auth_failed_401"
+        elif "503" in text or "UNAVAILABLE" in text:
+            key = "model_unavailable_503"
+        else:
+            key = text.split(":")[0] or "unknown"
+        kinds[key] = kinds.get(key, 0) + 1
+    return kinds
+
+
 def summarise(results: list[CaseResult]) -> dict:
     done = [r for r in results if r.error is None]
     failed = [r for r in results if r.error is not None]
@@ -145,11 +161,18 @@ def summarise(results: list[CaseResult]) -> dict:
     sc = [r for r in done if r.sc_warning_ok is not None]
     seconds = [r.seconds for r in done]
 
+    coverage = round(100 * len(done) / len(results), 1) if results else 0.0
     return {
         "model": config.GEMINI_MODEL,
         "cases_total": len(results),
         "cases_answered": len(done),
         "cases_errored": len(failed),
+        "coverage_pct": coverage,
+        # A run that answered only a fraction of its questions cannot support a
+        # headline percentage. Saying "100% tool accuracy" off 3 of 30 questions
+        # would be exactly the overclaiming this project exists to avoid.
+        "complete": coverage >= 90.0,
+        "error_kinds": _error_kinds(failed),
         "tool_routing_accuracy_pct": pct(sum(r.tool_ok for r in done), len(done)),
         "out_of_scope_handled_honestly_pct": pct(
             sum(bool(r.honest_ok) for r in honesty), len(honesty)
@@ -182,7 +205,22 @@ def render(summary: dict, results: list[CaseResult]) -> str:
         f"- Model: **{summary['model']}**",
         f"- Questions: **{summary['cases_total']}** "
         f"({summary['cases_answered']} answered, {summary['cases_errored']} errored)",
+        f"- Coverage: **{summary['coverage_pct']}%**",
         "",
+    ]
+    if not summary["complete"]:
+        lines += [
+            "> ## INCOMPLETE RUN - THESE NUMBERS ARE NOT REPORTABLE",
+            ">",
+            f"> Only {summary['cases_answered']} of {summary['cases_total']} questions "
+            f"were answered ({summary['coverage_pct']}% coverage). The percentages below "
+            "are computed over the answered subset only and must not be quoted as the "
+            "agent's accuracy.",
+            ">",
+            f"> Failures by kind: `{summary['error_kinds']}`",
+            "",
+        ]
+    lines += [
         "## Results",
         "",
         "| Measure | Result |",
@@ -234,12 +272,32 @@ def render(summary: dict, results: list[CaseResult]) -> str:
     return "\n".join(lines)
 
 
+def _save(results: list[CaseResult]) -> dict:
+    summary = summarise(results)
+    RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    RESULTS_FILE.write_text(
+        json.dumps({"summary": summary, "cases": [asdict(r) for r in results]}, indent=2)
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return summary
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="python -m copilot.evaluate")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
-        "--pause", type=float, default=6.0,
-        help="seconds to wait between questions, for free-tier rate limits",
+        "--pause", type=float, default=30.0,
+        help=(
+            "seconds to wait between questions. The free tier is measured per "
+            "MINUTE, and each question costs about two API calls, so a short "
+            "pause exhausts the quota within a handful of questions."
+        ),
+    )
+    parser.add_argument(
+        "--resume", action="store_true",
+        help="keep answers from the previous run and only retry what failed",
     )
     args = parser.parse_args()
 
@@ -248,8 +306,22 @@ def main() -> int:
     print(f"Running {len(cases)} questions against {config.GEMINI_MODEL}")
     print(f"Pausing {args.pause}s between questions for the free-tier limit.\n")
 
+    previous: dict[str, dict] = {}
+    if args.resume and RESULTS_FILE.exists():
+        stored = json.loads(RESULTS_FILE.read_text(encoding="utf-8"))
+        previous = {
+            case["id"]: case
+            for case in stored.get("cases", [])
+            if not case.get("error")
+        }
+        print(f"Resuming: {len(previous)} question(s) already answered will be skipped.\n")
+
     results: list[CaseResult] = []
     for index, case in enumerate(cases, start=1):
+        if case["id"] in previous:
+            results.append(CaseResult(**previous[case["id"]]))
+            print(f"[{index:>2}/{len(cases)}] {case['id']:<4} {case['kind']:<14}  (kept from earlier run)")
+            continue
         print(f"[{index:>2}/{len(cases)}] {case['id']:<4} {case['kind']:<14} ", end="", flush=True)
         result = run_case(case, client)
         results.append(result)
@@ -268,6 +340,10 @@ def main() -> int:
             if result.removed_count:
                 flags.append(f"checker removed {result.removed_count}")
             print(f"{result.seconds:>5.1f}s  {'; '.join(flags) or 'ok'}")
+        # Write after every question. A rate limit part-way through must not
+        # cost us the answers already paid for.
+        _save(results)
+
         if index < len(cases):
             time.sleep(args.pause)
 

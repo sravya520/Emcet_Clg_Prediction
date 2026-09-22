@@ -387,7 +387,7 @@ This is a product requirement, not a nice-to-have: an untested band presented wi
 same confidence as a tested one is exactly the kind of quiet overclaim this project
 exists to avoid. It gets its own eval case in Phase 4.
 
-## 8. Phase 3 — Agent layer *(plan, for approval)*
+## 8. Phase 3 — Agent layer **(built)**
 
 - **Framework-free tool-calling loop** over Gemini function calling. Max **6** iterations,
   then a forced final answer. Tenacity: exponential backoff on 429/5xx.
@@ -402,7 +402,7 @@ exists to avoid. It gets its own eval case in Phase 4.
 - **Guardrails.** Out-of-data questions (placements, "is this college good?", hostel quality)
   → honest "not in my data".
 
-## 9. Phase 4 — App, eval, deploy, docs *(plan, for approval)*
+## 9. Phase 4 — App, eval, deploy, docs *(4a and eval built; app and deploy still to come)*
 
 - **FastAPI:** `/recommend` (no LLM, deterministic) and `/chat` (agent).
 - **Streamlit:** form mode + chat mode; data year and phase always visible; the official
@@ -435,7 +435,9 @@ the source explicitly excludes · placements (no official source exists).
 | R1 | **The source forbids predictive use** (disclaimer §5.6). | Position as "what happened last year + measured bands", never a guarantee. Show the disclaimer in the UI. Publish backtest error rates. |
 | R2 | **SC sub-classification break (2025).** | Tune on Fold A (2023→2024) where SC is comparable; exclude SC from Fold B and say so. UI collects SC-I/II/III for 2025. |
 | R3 | **No 2025 fee data.** | **Resolved:** fee and the budget filter are out of the MVP (§5.5). No year-mixing, no "not available" clutter. Revisit only if an official 2025 fee notification is found. |
-| R4 | **Gemini free-tier limits.** Google no longer publishes per-model free RPD on the docs page (it defers to AI Studio); third-party trackers claim Flash RPD may be as low as ~20/day, which would not survive a 30-case eval. | `GEMINI_MODEL` stays an env var. Cache eval responses. Run bulk eval on a Flash-Lite model (far higher RPD). Measure and report actual cost/latency. |
+| R4 | **Gemini free-tier limits and availability.** Confirmed in practice: `gemini-3.8-flash` returned `503 UNAVAILABLE - experiencing high demand` on the free tier and could not be used at all. | `GEMINI_MODEL` is an env var, so the switch to `gemini-3.5-flash` was a one-line config change with no code touched. Tenacity retries 429/5xx with backoff. The eval pauses between questions. Flash-Lite remains available if daily limits bite. |
+| R8 | **TLS-inspecting networks break the SDK.** College wifi, office proxies and some antivirus re-sign every connection with their own certificate authority. Python ships its own certificate bundle and never consults the machine's, so the SDK fails with `CERTIFICATE_VERIFY_FAILED` where the browser works fine. Hit on the very first live call. | The client also trusts the OS certificate store via `truststore`. Certificates are still verified — we just look where the rest of the machine looks. |
+| R9 | **The checker's false positives are the real risk, not its misses.** Three surfaced only when talking to the live model: official region names, numbers printed inside a tool's sentence, and words inside a genuine college name. Each one silently deleted something true. | Every one is now pinned by a test. The lesson recorded here: a checker that is too aggressive destroys trust just as fast as one that is too loose, and only real traffic finds those cases. |
 | R5 | **Source URLs rot** — `eapcet-sche.aptonline.in` is already dead. | Raw files committed with SHA-256; `sources.json` records the original URL and retrieval date. |
 | R6 | **PDF extraction errors.** | `pdfplumber` gave a clean, constant 31/30-column table on every page of all three PDFs. Phase 1 adds row-count and null-rate checks plus a 10-row manual spot-check against the source PDF. |
 | R7 | **Scope creep** into a general "college chatbot". | Tools are a closed set of four. Anything outside the table returns "not in my data". |

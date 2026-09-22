@@ -71,9 +71,11 @@
   "known_gaps": [
     {
       "field": "fee_inr",
-      "years_missing": [2025],
-      "status": "unresolved",
-      "detail": "The 2025 statement carries no fee column. AFRC/APHERMC fee notifications are the authoritative source but afrc.ap.gov.in was unreachable on 2026-09-22. Until an official notification is retrieved, fee_inr for 2025 stays NULL and the app must say 'not available'."
+      "years_missing": [
+        2025
+      ],
+      "status": "resolved_by_descoping",
+      "detail": "The 2025 statement carries no fee column. AFRC/APHERMC fee notifications are the authoritative source but afrc.ap.gov.in was unreachable on 2026-09-22. Decision (2026-09-22): fee and the budget filter are OUT of the MVP product surface rather than mixing a 2024 fee into a 2025 recommendation. fee_inr is still ingested for 2022-2024 but nothing reads it. See docs/DESIGN.md section 5.5."
     }
   ],
   "official_disclaimer_2024": [

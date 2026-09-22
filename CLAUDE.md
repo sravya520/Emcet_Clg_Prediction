@@ -5,9 +5,14 @@ Working rules for this repo. These are non-negotiable; they override convenience
 ## What this project is
 
 **Counselling Copilot** — a student enters their AP EAPCET rank, category, gender and
-preferences (branch, region, budget). The app returns realistic college+branch options
-grouped **Safe / Moderate / Reach**, explains why, and answers follow-up questions
-("compare these two", "which options have CSE under ₹1L fees?").
+preferences (branch, region, district, college type). The app returns realistic
+college+branch options grouped **Safe / Moderate / Reach**, explains why, and answers
+follow-up questions ("compare these two", "which of these have CSE in Visakhapatnam?").
+
+> **Fee / budget is out of MVP scope.** The 2025 last-rank statement dropped its fee
+> column and no official 2025 fee notification could be retrieved, so showing a fee
+> would mean mixing data years. See `docs/DESIGN.md` §5.5. Do not reintroduce a fee or
+> budget filter without a sourced 2025 fee document.
 
 Exam: **AP EAPCET** (renamed from AP EAMCET in 2022). The state lives in config as
 `EXAM_STATE` so TG EAPCET could be added later. We build and evaluate **AP only**.
@@ -81,7 +86,7 @@ Data          SQLite / parquet, long format, one row per
 ```
 
 **Verification before any answer reaches the user:**
-1. *Deterministic fabrication check* — every college, branch, rank and fee in the final
+1. *Deterministic fabrication check* — every college, branch and rank in the final
    answer must appear in **that turn's** tool outputs. If not: regenerate, or strip the value.
 2. *LLM verification pass* — for claims the deterministic check cannot cover.
 3. *Guardrail* — questions outside the data (placements, "is this college good?") get an

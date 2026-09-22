@@ -36,16 +36,17 @@ publish.
 
 | User | Needs |
 |---|---|
-| **Student** (primary) | A shortlist they can act on, grouped by risk, with the fee and region they care about. Follow-up questions in plain language. |
-| **Parent** | Fee, location, college type. Wants to know *why* an option is called Safe. |
+| **Student** (primary) | A shortlist they can act on, grouped by risk, filtered to the branch and region they care about. Follow-up questions in plain language. |
+| **Parent** | Location, college type, and *why* an option is called Safe. (Fee is out of MVP scope — §5.5.) |
 | **Me (portfolio)** | A system where every number is traceable to an official PDF and every claim is backed by an eval run. |
 
 ## 3. User stories
 
 1. As a student, I enter rank 45,000 / BC-B / female / AU region and get options grouped
    Safe / Moderate / Reach, each showing last year's closing rank and the data year.
-2. As a student, I ask "which of these have CSE under ₹1L fees?" and get a filtered list
-   built from tool results, not from the model's memory.
+2. As a student, I ask "which of these have CSE in Visakhapatnam?" (or "…which are
+   university colleges?") and get a filtered list built from tool results, not from the
+   model's memory. *Originally a fee/budget filter — dropped, see §5.5.*
 3. As a student, I ask "compare AITS Rajampet and Vignan Vizag for ECE" and get a
    side-by-side of the fields we actually hold.
 4. As a student, I ask "why is this one Moderate?" and get the actual rule and numbers
@@ -78,7 +79,7 @@ flowchart TD
 
     T -->|"tool results"| LOOP
     LOOP --> V["Verification"]
-    V --> V1["Deterministic fabrication check<br/>every college/branch/rank/fee<br/>must appear in this turn's tool output"]
+    V --> V1["Deterministic fabrication check<br/>every college/branch/rank<br/>must appear in this turn's tool output"]
     V --> V2["LLM verification pass<br/>for uncoverable claims"]
     V --> V3["Out-of-data guardrail<br/>-> 'not in my data'"]
     V --> UI
@@ -173,14 +174,28 @@ This is the real engineering work in Phase 1.
 
 1,314 matched pairs × ~9 categories × 2 genders is a solid backtest base.
 
-### 5.5 Fee data
+### 5.5 Fee data — **dropped from the MVP** (decided 2026-09-22)
 
-`COLLFEE` is **inside** the 2022–2024 rank statements (e.g. ₹43,000 / ₹53,500), so no
-separate fee source is needed for those years. 2025 has no fee column.
+`COLLFEE` is **inside** the 2022–2024 rank statements (e.g. ₹43,000 / ₹53,500). **2025 has
+no fee column.** Fees are set by AFRC / APHERMC for a 3-year block period, but
+`afrc.ap.gov.in` was unreachable on 2026-09-22 (tested repeatedly, http and https) and the
+Internet Archive was offline the same day, so the block period could not be confirmed from
+an official source.
 
-Fees are set by AFRC / APHERMC for a **3-year block period**. `afrc.ap.gov.in` was
-unreachable on 2026-09-22 (tested repeatedly, http and https). The Internet Archive was
-also offline that day. See Q1.
+**Decision: fee is out of the MVP product surface.** Recommendations are built on 2025
+data; showing a 2024 fee beside a 2025 closing rank is exactly the quiet year-mixing this
+project exists to avoid, and we cannot source a 2025 fee honestly.
+
+Consequences, accepted:
+- No `budget` input. No budget filter. User story #2 is re-pointed at `district` /
+  `college_type`, which 2025 *does* carry.
+- Fee never appears in any answer, so it is not part of the fabrication-check surface.
+- `fee_inr` is still **ingested** for 2022–2024, because it is in the source and faithful
+  parsing is cheap. Nothing reads it. If an official 2025 fee notification turns up later,
+  restoring the feature is a data task, not a refactor.
+
+This is a real product loss — fee is a top concern for AP families — taken deliberately in
+favour of the data-honesty rule.
 
 ### 5.6 The official disclaimer (stored verbatim in `sources.json`)
 
@@ -214,8 +229,7 @@ One long-format table, `cutoffs` — one row per
 | `gender` | text | BOYS / GIRLS |
 | `local_area` | text | applicant region |
 | `closing_rank` | int, **nullable** | missing stays missing |
-| `fee_inr` | int, **nullable** | |
-| `fee_source_year` | int, nullable | may differ from `year` — see Q1 |
+| `fee_inr` | int, **nullable** | ingested for 2022–2024, null for 2025. **Not surfaced** — see §5.5 |
 | `source_url` | text | FK into `sources.json` |
 
 Nullable is load-bearing: a blank cell means *no candidate of that category was admitted to
@@ -252,7 +266,7 @@ variants → canonical), `category_map.csv` (including the 2025 SC split).
 `t1`, `t2`, `t3` are **not guessed** — they come from the backtest below and get published
 with their numbers.
 
-### 7.3 Backtest design
+### 7.3 Backtest design — **two folds (decided 2026-09-22)**
 
 Band using year *N−1*, check against year *N* actuals. Two folds:
 
@@ -297,14 +311,18 @@ Fold B, with SC exclusion stated, is what makes it defensible in an interview.
 ## 10. Scope
 
 **MVP (2–3 days)**
-AP only · MPC stream · 2025 as the recommending year, 2024/2023 for backtest · the four
-tools · form + chat · fabrication check · backtest + agent eval · Docker + one deployment.
+AP only · MPC stream · 2025 as the recommending year, 2024/2023 for backtest · filters on
+branch / region / district / college type · the four tools · form + chat · fabrication
+check · backtest + agent eval · Docker + one deployment.
 
 **Later (explicitly not now)**
-TG EAPCET · BiPC stream (agriculture/pharmacy — the 2025 BiPC statement exists at
+**Fee and the budget filter** (no official 2025 source — §5.5) · TG EAPCET · BiPC stream
+(agriculture/pharmacy — the 2025 BiPC statement exists at
 `cap.apcfss.in/TET-PDF/EAPCET-BIPC-DOCS/AP_EAPCET_BIPC_2025_LAST_RANK_DETAILS.pdf`) ·
-NAAC/NBA accreditation join · seat-matrix data · special reservation categories (PWD, NCC,
-Sports, CAP) which the source explicitly excludes · placements (no official source exists).
+**NAAC/NBA accreditation join** (needs a naac.gov.in scrape plus fuzzy college-name
+matching across sources — roughly half a day, and silent wrong joins are the likely
+failure) · seat-matrix data · special reservation categories (PWD, NCC, Sports, CAP) which
+the source explicitly excludes · placements (no official source exists).
 
 ## 11. Risks
 
@@ -312,33 +330,38 @@ Sports, CAP) which the source explicitly excludes · placements (no official sou
 |---|---|---|
 | R1 | **The source forbids predictive use** (disclaimer §5.6). | Position as "what happened last year + measured bands", never a guarantee. Show the disclaimer in the UI. Publish backtest error rates. |
 | R2 | **SC sub-classification break (2025).** | Tune on Fold A (2023→2024) where SC is comparable; exclude SC from Fold B and say so. UI collects SC-I/II/III for 2025. |
-| R3 | **No 2025 fee data.** | Q1. Until resolved, `fee_inr` is null for 2025 and the app says "not available"; the budget filter degrades honestly. |
+| R3 | **No 2025 fee data.** | **Resolved:** fee and the budget filter are out of the MVP (§5.5). No year-mixing, no "not available" clutter. Revisit only if an official 2025 fee notification is found. |
 | R4 | **Gemini free-tier limits.** Google no longer publishes per-model free RPD on the docs page (it defers to AI Studio); third-party trackers claim Flash RPD may be as low as ~20/day, which would not survive a 30-case eval. | `GEMINI_MODEL` stays an env var. Cache eval responses. Run bulk eval on a Flash-Lite model (far higher RPD). Measure and report actual cost/latency. |
 | R5 | **Source URLs rot** — `eapcet-sche.aptonline.in` is already dead. | Raw files committed with SHA-256; `sources.json` records the original URL and retrieval date. |
 | R6 | **PDF extraction errors.** | `pdfplumber` gave a clean, constant 31/30-column table on every page of all three PDFs. Phase 1 adds row-count and null-rate checks plus a 10-row manual spot-check against the source PDF. |
 | R7 | **Scope creep** into a general "college chatbot". | Tools are a closed set of four. Anything outside the table returns "not in my data". |
 
-## 12. Open questions *(blocking — need answers before Phase 1 ships)*
+## 12. Decisions and open questions
 
-**Q1 — 2025 fee.** The 2025 statement has no fee column. Options:
-  **(a)** Carry the 2024 `COLLFEE` forward into a *separate, clearly-labelled* field
-  (`fee_inr` + `fee_source_year = 2024`), with the UI stating "fee from the 2024 statement;
-  the 2025 statement carries no fee column". Defensible because AFRC fixes fees for a
-  3-year block — **but I could not verify that block period from an official source**, since
-  `afrc.ap.gov.in` was down.
-  **(b)** Leave 2025 fee null, say "not available", and drop the budget filter from the MVP
-  (this kills user story #2).
-  *Recommendation: (a)*, because the number is genuinely official and honestly labelled,
-  and it keeps the budget user story alive.
+### Resolved (2026-09-22)
 
-**Q2 — Backtest year pairing.** Confirm the two-fold design in §7.3 (tune on 2023→2024,
-validate on 2024→2025) rather than a single 2024→2025 fold. This gives an honest held-out
-number and works around the SC break.
+**Q1 — 2025 fee. → Fee dropped from the MVP.** The 2025 statement has no fee column and no
+official 2025 fee notification could be retrieved. Rather than mix a 2024 fee into a
+2025 recommendation, fee and the budget filter are out of scope. Full reasoning and
+accepted consequences in §5.5.
+
+**Q2 — Backtest pairing. → Two folds.** Tune `t1,t2,t3` on Fold A (2023→2024, all
+categories comparable); validate on held-out Fold B (2024→2025, SC excluded and reported).
+See §7.3.
+
+**Q4 — NAAC/NBA. → Out of MVP scope.** Needs a naac.gov.in scrape plus fuzzy college-name
+matching; roughly half a day and prone to silent wrong joins. Listed under §10 Later.
+
+### Still open
 
 **Q3 — Commit identity.** Git had no identity configured. I set it repo-locally to
-`Sravya <raghu.ic3@gmail.com>`. If your GitHub account uses a different email, these commits
-won't attribute to you — tell me the right one and I'll amend.
+`Sravya <raghu.ic3@gmail.com>`. If the GitHub account uses a different email, these commits
+will not attribute on GitHub — say the word and I will amend both commits.
 
-**Q4 — NAAC/NBA.** Officially listed accreditation data would need a separate scrape of
-`naac.gov.in` and NBA listings, plus fuzzy-matching college names across sources. That is a
-half-day on its own and is the first thing I'd cut. *Recommendation: out of MVP scope.*
+**Q5 — Branch-name source.** The statements carry branch *codes* only (`CSM`, `CSD`, `AID`,
+`CIC`…), not full names. 73 distinct codes in 2025. Expanding them to readable names
+("CSM → CSE (AI & ML)") needs a mapping that is hand-written and reviewed, since no
+official code→name table was found alongside the statements. Planned as
+`branch_map.csv`, checked into git and reviewed by hand — flagged here because the
+*expansions themselves* are my inference, not sourced data, and the UI should not present
+them as official.

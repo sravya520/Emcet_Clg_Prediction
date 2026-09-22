@@ -271,8 +271,8 @@ HTML shell (`Content-Type: text/html`), not data.
 **Conclusion: no official source. Every branch name in this project is therefore marked
 `name_status = unofficial` in `data/mappings/branch_map.csv`**, with a `confidence`
 column. Where confidence is low the name is left **blank** rather than invented, and the
-UI shows the raw code. 77 codes total: 16 high confidence, 14 medium, 47 blank. The
-named codes cover about 95% of all rows, because the unnamed ones are rare branches.
+UI shows the raw code. 77 codes total: 20 high confidence, 16 medium, 41 left blank. The
+36 named codes cover **95.4% of all rows**, because the unnamed ones are rare branches.
 
 
 ## 6. Data model

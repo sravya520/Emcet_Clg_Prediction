@@ -57,6 +57,10 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
     branches: set[str] = set()
     numbers: set[int] = set()
     years: set[int] = set()
+    # Every word the tools actually emitted. Needed so that words inside a real
+    # college name - "ADITYA INSTITUTE OF TECHNOLOGY AND MGMT" - are not
+    # mistaken for invented college codes when the model quotes the name back.
+    words: set[str] = set()
 
     def walk(node: Any, key: str | None = None) -> None:
         if isinstance(node, dict):
@@ -66,6 +70,7 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
             for child in node:
                 walk(child, key)
         elif isinstance(node, str):
+            words.update(re.findall(r"[A-Za-z0-9]+", node.upper()))
             if key == "college_code":
                 colleges.add(node.upper())
             elif key == "branch_code":
@@ -96,6 +101,7 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
         "branches": branches,
         "numbers": numbers,
         "years": years,
+        "words": words,
     }
 
 
@@ -210,7 +216,12 @@ def _scrub_text(text: str, facts: dict[str, set]) -> tuple[str, list[RemovedItem
 
     def replace_code(match: re.Match) -> str:
         token = match.group(0)
-        if token in NOT_CODES or token in facts["colleges"] or token in facts["branches"]:
+        if (
+            token in NOT_CODES
+            or token in facts["colleges"]
+            or token in facts["branches"]
+            or token in facts.get("words", set())
+        ):
             return token
         if not any(c.isdigit() for c in token) and len(token) <= 3:
             return token  # short all-letter words are prose, not codes

@@ -301,12 +301,46 @@ def main() -> None:
         excluded,
     )
 
+    # Single source of truth for every accuracy figure quoted anywhere else.
+    # Written only now, after the hold-out has run, so it cannot have leaked
+    # backwards into the limits.
+    config.BACKTEST_RESULTS.write_text(
+        json.dumps(
+            {
+                "tuning": _fold_json(fold_a),
+                "holdout": {
+                    **_fold_json(fold_b),
+                    "note": (
+                        "Measured on 2024 -> 2025, which was not used to choose the "
+                        "limits. SC was excluded because 2025 split SC into "
+                        "SC-I / SC-II / SC-III."
+                    ),
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
     report = render(thresholds, fold_a, fold_b)
     config.BACKTEST_REPORT.write_text(report, encoding="utf-8", newline="\n")
     print(f"\nWrote {config.BACKTEST_REPORT}\n")
     print(fold_a.per_band.to_string(index=False))
     print()
     print(fold_b.per_band.to_string(index=False))
+
+
+def _fold_json(fold: FoldResult) -> dict:
+    per_band = fold.per_band.set_index("band")
+    return {
+        "fold": f"{fold.prev_year}->{fold.next_year}",
+        "accuracy": {band: per_band.loc[band, "how often right"] for band in per_band.index},
+        "times_shown": {band: int(per_band.loc[band, "times shown"]) for band in per_band.index},
+        "options_matched": fold.options_matched,
+        "excluded_categories": fold.excluded_categories,
+    }
 
 
 def render(thresholds: Thresholds, fold_a: FoldResult, fold_b: FoldResult) -> str:

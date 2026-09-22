@@ -40,6 +40,8 @@ BACKTEST_REPORT: Path = REPO_ROOT / "docs" / "BACKTEST.md"
 BRANCH_MAP: Path = MAPPINGS_DIR / "branch_map.csv"
 COLLEGE_MAP: Path = MAPPINGS_DIR / "college_map.csv"
 THRESHOLDS: Path = MAPPINGS_DIR / "thresholds.json"
+#: Written AFTER the hold-out runs, so thresholds.json stays locked beforehand.
+BACKTEST_RESULTS: Path = MAPPINGS_DIR / "backtest_results.json"
 
 # --- LLM --------------------------------------------------------------------
 # Never hardcode a model id, and never print the key. See CLAUDE.md.

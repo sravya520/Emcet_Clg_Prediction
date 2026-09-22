@@ -1,0 +1,38 @@
+{
+  "tuning": {
+    "fold": "2023->2024",
+    "accuracy": {
+      "Safe": "97.1%",
+      "Moderate": "72.8%",
+      "Reach": "29.7%"
+    },
+    "times_shown": {
+      "Safe": 7208266,
+      "Moderate": 3704467,
+      "Reach": 1799662
+    },
+    "options_matched": 21216,
+    "excluded_categories": []
+  },
+  "holdout": {
+    "fold": "2024->2025",
+    "accuracy": {
+      "Safe": "97.8%",
+      "Moderate": "67.7%",
+      "Reach": "33.9%"
+    },
+    "times_shown": {
+      "Safe": 6434923,
+      "Moderate": 2974029,
+      "Reach": 1070841
+    },
+    "options_matched": 17959,
+    "excluded_categories": [
+      "SC",
+      "SC-I",
+      "SC-II",
+      "SC-III"
+    ],
+    "note": "Measured on 2024 -> 2025, which was not used to choose the limits. SC was excluded because 2025 split SC into SC-I / SC-II / SC-III."
+  }
+}

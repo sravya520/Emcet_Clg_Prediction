@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "model": "gemini-3.5-flash",
+    "cases_total": 3,
+    "cases_answered": 3,
+    "cases_errored": 0,
+    "tool_routing_accuracy_pct": 100.0,
+    "out_of_scope_handled_honestly_pct": null,
+    "out_of_scope_cases": 0,
+    "sc_warning_shown_pct": null,
+    "sc_cases": 0,
+    "schema_valid_pct": 100.0,
+    "turns_where_checker_removed_something": 0,
+    "checker_removal_rate_pct": 0.0,
+    "total_items_removed": 0,
+    "avg_seconds_per_answer": 22.97,
+    "median_seconds_per_answer": 13.11,
+    "slowest_seconds": 46.42,
+    "avg_steps": 2
+  },
+  "cases": [
+    {
+      "id": "n01",
+      "kind": "normal",
+      "question": "rank 34000 OC boy from AU region, what are my CSE options?",
+      "tools_called": [
+        "recommend_options"
+      ],
+      "expected_tools": [
+        "recommend_options"
+      ],
+      "tool_ok": true,
+      "schema_ok": true,
+      "honest_ok": null,
+      "sc_warning_ok": null,
+      "removed_count": 0,
+      "steps": 2,
+      "seconds": 46.42,
+      "error": null,
+      "reply_preview": "Based on the 2025 AP EAPCET counselling data (end of web counselling phase) for an OC Boy from the AU region with a rank of 34,000, here are some of your Computer Science and Engineering (CSE) options categorized by Safe, Moderate, and Reach bands. Please note that these are last year's results and do not guarantee a seat for the current academic year.\n\n- **Safe Options (Closing ranks > 40k):** Yo"
+    },
+    {
+      "id": "n02",
+      "kind": "normal",
+      "question": "I got 12500 rank, BC-B, girl, SVU region. What can I get?",
+      "tools_called": [
+        "recommend_options"
+      ],
+      "expected_tools": [
+        "recommend_options"
+      ],
+      "tool_ok": true,
+      "schema_ok": true,
+      "honest_ok": null,
+      "sc_warning_ok": null,
+      "removed_count": 0,
+      "steps": 2,
+      "seconds": 13.11,
+      "error": null,
+      "reply_preview": "Based on your AP EAPCET rank of 12,500 (BC-B, Female, SVU region), here are some options from the 2025 counselling data (end of web counselling phase). Please note that these are last year's closing ranks and do not guarantee admission for this year.\n\n**Safe Options (Closing ranks well above 12,500):**\n- **G PULLA REDDY ENGINEERING COLLEGE (GPRE)**: CSE (Closing rank: 21,339), CSM (Closing rank: 2"
+    },
+    {
+      "id": "n03",
+      "kind": "normal",
+      "question": "My rank is 150000. ST category, boy, AU. Any options left for me?",
+      "tools_called": [
+        "recommend_options"
+      ],
+      "expected_tools": [
+        "recommend_options"
+      ],
+      "tool_ok": true,
+      "schema_ok": true,
+      "honest_ok": null,
+      "sc_warning_ok": null,
+      "removed_count": 0,
+      "steps": 2,
+      "seconds": 9.38,
+      "error": null,
+      "reply_preview": "Based on the 2025 AP EAPCET counselling data (from the end of web counselling phase), there are several options available for an ST category boy from the AU region with a rank of 150,000. In total, there are 822 options (693 Moderate and 129 Reach, with no Safe options returned in this range). \n\nPlease keep in mind that these are last year's results and do not guarantee an allotment this year. The"
+    }
+  ]
+}

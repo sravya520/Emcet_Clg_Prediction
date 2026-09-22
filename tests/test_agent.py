@@ -509,3 +509,47 @@ def test_indian_lakh_grouping_is_read_correctly(real_result):
     answer = Answer(reply=f"That one closed at {indian}.")
     checked = verify.check(answer, [details])
     assert indian in checked.answer.reply, checked.removed
+
+
+# --- Regression: non-string dict keys ---------------------------------------
+
+
+def test_compare_options_output_does_not_crash_the_checker():
+    """compare_options keys closing_rank_by_year by the year as an INT.
+
+    That reached `"year" in key` inside the checker and crashed the whole
+    turn part-way through a live eval run.
+    """
+    result = tools.compare_options(
+        [{"college_code": "ADIT", "branch_code": "CSE"}], category="OC", gender="BOYS"
+    )
+    by_year = result["rows"][0]["closing_rank_by_year"]
+    assert all(isinstance(k, int) for k in by_year), "fixture must have int keys"
+
+    facts = verify.collect_facts([result])
+    assert 2025 in facts["years"]
+    assert any(v in facts["numbers"] for v in by_year.values())
+
+
+def test_every_tool_output_survives_the_checker():
+    """Run each tool for real and make sure the checker can digest its shape."""
+    outputs = [
+        tools.recommend_options(34_000, "OC", "BOYS", "AU", per_band=2),
+        tools.get_option_details("ADIT", "CSE"),
+        tools.compare_options(
+            [{"college_code": "ADIT", "branch_code": "CSE"},
+             {"college_code": "KITS", "branch_code": "CSE"}]
+        ),
+        tools.explain_bands(),
+    ]
+    for output in outputs:
+        checked = verify.check(Answer(reply="ok"), [output])
+        assert checked is not None
+
+
+def test_a_year_used_as_an_int_key_is_trusted():
+    result = tools.compare_options([{"college_code": "ADIT", "branch_code": "CSE"}])
+    answer = Answer(reply="In 2023 it closed higher than in 2024.")
+    checked = verify.check(answer, [result])
+    assert "2023" in checked.answer.reply and "2024" in checked.answer.reply
+    assert checked.passed_clean, checked.removed

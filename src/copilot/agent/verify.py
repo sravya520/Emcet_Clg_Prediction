@@ -87,7 +87,10 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
     def walk(node: Any, key: str | None = None) -> None:
         if isinstance(node, dict):
             for child_key, child in node.items():
-                walk(child, child_key)
+                # Keys are not always strings. compare_options returns
+                # closing_rank_by_year keyed by the year as an INT, which used
+                # to reach `"year" in key` and crash the whole turn.
+                walk(child, child_key if isinstance(child_key, str) else str(child_key))
         elif isinstance(node, list):
             for child in node:
                 walk(child, key)
@@ -172,9 +175,16 @@ def _name_is_vouched(phrase: str, names: set[str]) -> bool:
 def _collect_year_keys(node: Any, years: set[int], numbers: set[int]) -> None:
     if isinstance(node, dict):
         for key, child in node.items():
-            if isinstance(key, str) and key.isdigit() and len(key) == 4:
-                years.add(int(key))
-                numbers.add(int(key))
+            # A year can arrive as an int key (straight from Python) or a string
+            # key (after a JSON round-trip). Accept both.
+            value: int | None = None
+            if isinstance(key, int) and not isinstance(key, bool):
+                value = key
+            elif isinstance(key, str) and key.isdigit() and len(key) == 4:
+                value = int(key)
+            if value is not None and 1900 <= value <= 2100:
+                years.add(value)
+                numbers.add(value)
             _collect_year_keys(child, years, numbers)
     elif isinstance(node, list):
         for child in node:

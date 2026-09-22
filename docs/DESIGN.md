@@ -412,6 +412,36 @@ exists to avoid. It gets its own eval case in Phase 4.
   schema-valid rate, latency and cost per query. All results `[TBD after eval]` until run.
 - **Docker**, free-tier deploy, README with real numbers only.
 
+### 9.1 The free-tier limit is a product constraint, not just an ops detail
+
+Measured, not guessed: the API returned
+
+    quotaId    GenerateRequestsPerDayPerProjectPerModel-FreeTier
+    quotaValue 20
+
+So the free tier allows **20 requests per day, per model, per project**. One chat
+question costs about two requests (one to pick a tool, one to answer), so a single
+model supports roughly **ten chat questions a day**. The quota is per model, so
+changing `GEMINI_MODEL` gets a separate allowance.
+
+**This shapes the app, and the app must be built around it:**
+
+- **The form mode must never depend on the AI.** `/recommend` and the form UI call the
+  deterministic engine directly. They keep working when the chat quota is gone, when the
+  API is down, and when there is no key at all. The form is the product; the chat is a
+  convenience on top of it.
+- **When the chat quota runs out, say so plainly and point at the form.** Not a stack
+  trace, not a silent failure, not a made-up answer. Something like: *"I have hit today's
+  chat limit. The search form below still works and uses the same data."*
+- A `429` must be told apart from a `401`. Out of quota and bad credentials need
+  different messages, because they need different actions from the user.
+
+### 9.2 API key format
+
+Keys issued by AI Studio now begin with `AQ.`. The older `AIza` format is being phased
+out. An `AQ.` key is the normal, current format - not a temporary token. Recorded here
+because an early assumption that only `AIza` was valid led to a wrong diagnosis.
+
 ## 10. Scope
 
 **MVP (2–3 days)**

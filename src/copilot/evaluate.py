@@ -309,6 +309,18 @@ def main() -> int:
     previous: dict[str, dict] = {}
     if args.resume and RESULTS_FILE.exists():
         stored = json.loads(RESULTS_FILE.read_text(encoding="utf-8"))
+        stored_model = stored.get("summary", {}).get("model")
+        if stored_model and stored_model != config.GEMINI_MODEL:
+            # Mixing models inside one results file would make every headline
+            # number meaningless: nobody could say which model produced what.
+            print(
+                f"REFUSING TO RESUME.\n"
+                f"  The saved results came from {stored_model!r}\n"
+                f"  but GEMINI_MODEL is now {config.GEMINI_MODEL!r}.\n\n"
+                f"  A single report must describe a single model. Either switch back,\n"
+                f"  or move {RESULTS_FILE.name} aside and start a clean run."
+            )
+            return 2
         previous = {
             case["id"]: case
             for case in stored.get("cases", [])

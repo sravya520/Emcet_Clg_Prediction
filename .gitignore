@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Data: raw sources ARE committed (provenance, see data/raw/sources.json).
+# Everything derived is rebuilt by the pipeline and stays out of git.
+data/processed/
+data/interim/
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

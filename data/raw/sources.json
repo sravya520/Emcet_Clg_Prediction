@@ -1,0 +1,88 @@
+{
+  "_comment": "Provenance manifest for raw AP EAPCET source documents. Every processed row must trace back to one entry here via source_url. Do not add an entry unless the file was downloaded from an official government domain (apsche.ap.gov.in, cap.apcfss.in, cets.apsche.ap.gov.in).",
+  "exam_state": "AP",
+  "retrieved_on": "2026-09-22",
+  "sources": [
+    {
+      "id": "ap_eapcet_2022_mpc_lastrank",
+      "academic_year": 2022,
+      "stream": "MPC",
+      "file": "APEAMCET2022LASTRANKDETAILS.pdf",
+      "format": "pdf",
+      "pages": 60,
+      "sha256": "909ec9b9506919342d95cbe9c8f8a7006aeca2d6e90a0ea12e27455b927db4d9",
+      "bytes": 4193109,
+      "source_url": "https://apsche.ap.gov.in/Pdf/APEAMCET2022LASTRANKDETAILS.pdf",
+      "publisher": "Andhra Pradesh State Council of Higher Education (APSCHE)",
+      "doc_title": "APEAPCET-2022[ M P C STREAM] LAST RANK DETAILS OF PRIVATE & UNIVERSITY INSTITUTIONS",
+      "counselling_phase": "end_of_web_counselling",
+      "phase_stated_in_doc": false,
+      "notes": "Title limits coverage to private & university institutions. Schema variant A: lowercase inst_code/inst_name/type, AFFLIA.UNIV, has Local_Area column (mostly blank), 18 category-gender columns, COLLFEE present."
+    },
+    {
+      "id": "ap_eapcet_2023_mpc_lastrank",
+      "academic_year": 2023,
+      "stream": "MPC",
+      "file": "APEAPCET2023LASTRANKDETAILS.pdf",
+      "format": "pdf",
+      "pages": 57,
+      "sha256": "498f6dd6eb08d1eed230e5e79bea33660609d1207b92ab0b371de552f073c7c5",
+      "bytes": 4135431,
+      "source_url": "https://apsche.ap.gov.in/Pdf/APEAPCET2023LASTRANKDETAILS.pdf",
+      "publisher": "Andhra Pradesh State Council of Higher Education (APSCHE)",
+      "doc_title": "APEAPCET-2023[ M P C STREAM] LAST RANK DETAILS",
+      "counselling_phase": "end_of_web_counselling",
+      "phase_stated_in_doc": false,
+      "notes": "Schema variant B: INSTCODE/NAME OF THE INSTITUTION/TYPE, AFFL., A_REG, no Local_Area, 18 category-gender columns, COLLFEE present."
+    },
+    {
+      "id": "ap_eapcet_2024_mpc_lastrank",
+      "academic_year": 2024,
+      "stream": "MPC",
+      "file": "APEAMCET2024LASTRANKDETAILSNONSW.XLS",
+      "format": "xls",
+      "sheet": "APEAMCET2024LASTRANKDETAILSNONS",
+      "sha256": "4b216e35375320f0c97a640e67ec6e568e149420e5adb8bf4729e4b07cd363a8",
+      "bytes": 583680,
+      "source_url": "https://apsche.ap.gov.in/Pdf/APEAMCET2024LASTRANKDETAILSNONSW.XLS",
+      "publisher": "Andhra Pradesh State Council of Higher Education (APSCHE)",
+      "doc_title": "APEAPCET-2024[ M P C STREAM] LAST RANK DETAILS",
+      "counselling_phase": "end_of_web_counselling",
+      "phase_stated_in_doc": false,
+      "notes": "Schema variant B (same as 2023) but native XLS, so no PDF extraction needed. 1568 data rows, 275 institutions, 69 branches. COLLFEE present. Carries the official disclaimer block as a trailing row. Filename token NONSW is unexplained; INST_REG='SW' is documented in-file as 'State wide'."
+    },
+    {
+      "id": "ap_eapcet_2025_mpc_lastrank",
+      "academic_year": 2025,
+      "stream": "MPC",
+      "file": "EAPCET2025LASTRANKDETAILS.pdf",
+      "format": "pdf",
+      "pages": 60,
+      "sha256": "f3ca34247b286fc87b315fd1e238b446bba36694a3a6af1f82c2bba24a15998a",
+      "bytes": 4555964,
+      "source_url": "https://cap.apcfss.in/TET-PDF/EAPCET-DOCS/EAPCET2025LASTRANKDETAILS.pdf",
+      "publisher": "AP Centre for Financial Systems and Services (APCFSS), Common Admissions Portal",
+      "doc_title": "APEAPCET-2025 ADMISSIONS LAST RANK DETAILS",
+      "counselling_phase": "end_of_web_counselling",
+      "phase_stated_in_doc": false,
+      "notes": "Schema variant C: 30 columns. SC is split into SCI/SCII/SCIII (22 category-gender columns). NO COLLFEE column. No PLACE/COED/AFFL/ESTD columns. Local_area populated (AU/SVU). 1609 data rows, 274 institutions, 73 branches."
+    }
+  ],
+  "known_gaps": [
+    {
+      "field": "fee_inr",
+      "years_missing": [2025],
+      "status": "unresolved",
+      "detail": "The 2025 statement carries no fee column. AFRC/APHERMC fee notifications are the authoritative source but afrc.ap.gov.in was unreachable on 2026-09-22. Until an official notification is retrieved, fee_inr for 2025 stays NULL and the app must say 'not available'."
+    }
+  ],
+  "official_disclaimer_2024": [
+    "Last rank statement does not reflect the candidates admitted in special reservation categories like PWD, NCC, Sports and Games, Children of Armed Personnel (CAP), Scouts & Guides seats & Minority colleges.",
+    "Every care has been taken to present accurate information. The Ranks shown are at the end of Web Counseling process and does not indicate the dropouts or spot admissions.",
+    "The statement shall be used only for information to assess the mode of opting by candidates and shall in no way reflect the rank upto which seat can be allotted in the present academic year.",
+    "Girls are also eligible for Boys seats.",
+    "The Convener is not responsible for Print Errors.",
+    "While exercising options candidates are advised to enter more number of options to avoid the disappointment of not securing a seat.",
+    "Inst_reg 'SW' means State wide."
+  ]
+}

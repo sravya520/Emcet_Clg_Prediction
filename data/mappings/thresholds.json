@@ -1,0 +1,14 @@
+{
+  "t_safe": 0.76,
+  "t_moderate": 1.15,
+  "t_max": 1.51,
+  "tuned_on": "2023->2024",
+  "tested_on": "2024->2025 (SC excluded)",
+  "boundary_targets": {
+    "Safe": 0.9,
+    "Moderate": 0.5,
+    "Reach": 0.2
+  },
+  "rank_step": 250,
+  "note": "Tuned on Fold A only. Written to disk BEFORE the hold-out fold was evaluated, so the hold-out result could not influence them."
+}

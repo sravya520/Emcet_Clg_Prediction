@@ -322,15 +322,23 @@ variants → canonical), `category_map.csv` (including the 2025 SC split).
 
 `r = student_rank / previous_year_closing_rank`
 
-| Band | Condition | Meaning |
-|---|---|---|
-| **Safe** | `r ≤ t1` | comfortably inside last year's closing rank |
-| **Moderate** | `t1 < r ≤ t2` | near the line |
-| **Reach** | `t2 < r ≤ t3` | outside last year's line but plausible |
-| *(excluded)* | `r > t3` | not shown |
+| Band | Condition | Tuned value | Meaning |
+|---|---|---|---|
+| **Safe** | `r ≤ t1` | **r ≤ 0.76** | comfortably inside last year's closing rank |
+| **Moderate** | `t1 < r ≤ t2` | **0.76 < r ≤ 1.15** | near the line |
+| **Reach** | `t2 < r ≤ t3` | **1.15 < r ≤ 1.51** | outside last year's line but plausible |
+| *(excluded)* | `r > t3` | **r > 1.51** | not shown |
 
-`t1`, `t2`, `t3` are **not guessed** — they come from the backtest below and get published
-with their numbers.
+`t1`, `t2`, `t3` are **not guessed**. Each line is drawn where the chance of getting in
+*for a student sitting at that line* falls to a set level on the tuning fold: 90% for
+Safe, 50% for Moderate, 20% for Reach. Measured **at** the line, not averaged below it —
+averaging lets a band's comfortable middle hide a weak edge, and an early version that
+averaged produced a Moderate band 0.01 wide. Stored in `data/mappings/thresholds.json`.
+
+**Within a band, options are ordered most-competitive-first** (lowest closing rank), so
+the best college a rank can reach appears at the top. Last year's closing rank is used as
+a stand-in for how sought-after a college is; it is a revealed preference from the data,
+never presented as a quality ranking.
 
 ### 7.3 Backtest design — **two folds (decided 2026-09-22)**
 
@@ -341,13 +349,24 @@ Band using year *N−1*, check against year *N* actuals. Two folds:
 - **Fold B — 2024 → 2025.** Held out for **validation**. SC is excluded here (the
   sub-classification break makes it non-comparable) and that exclusion is reported, not hidden.
 
-Reported per band: the share of options labelled *Safe* that were genuinely within reach in
-year *N* (`student_rank ≤ actual closing_rank`), and likewise for Moderate and Reach. A
-truthful Safe band should be ~90%+; a Reach band should be *low* by design — if Reach came
-out at 95% the bands would be meaningless.
+**Results (produced by `python -m copilot.engine.backtest`, full report in
+[BACKTEST.md](BACKTEST.md)):**
+
+| Band | Fold A — tuning (2023→2024) | Fold B — hold-out (2024→2025) |
+|---|---|---|
+| Safe | 97.1% | **97.8%** |
+| Moderate | 72.8% | **67.7%** |
+| Reach | 29.7% | **33.9%** |
+
+Fold B is the number that counts; Fold A is circular by construction. The hold-out held
+up — Safe stayed at ~98% on a year the limits had never seen — and the bands stay clearly
+separated, which is what makes the labels mean anything. Fold B covers 17,959 matched
+options and 10.5M simulated student-option pairs, SC excluded.
 
 **This is the honest, measurable core of the project.** Tuning on Fold A and validating on
-Fold B, with SC exclusion stated, is what makes it defensible in an interview.
+Fold B, with SC exclusion stated, is what makes it defensible in an interview. The report
+also discloses that the hold-out was evaluated twice, because a flaw in the first tuning
+method had to be fixed.
 
 ### 7.4 Required disclosure for SC students (non-negotiable)
 
@@ -425,13 +444,13 @@ the source explicitly excludes · placements (no official source exists).
 
 ### Resolved (2026-09-22)
 
-**Q1 — 2025 fee. → Fee stays out of the MVP, now with evidence.** Re-investigated in
-Phase 1. The official APHERMC order *is* a multi-year order covering the block period
-**2023-24 to 2025-26**, so it formally covers 2025. But the fee actually changed for
-**44.8% of colleges between 2023 and 2024 inside that same block**, sometimes by 100%.
-"Block covers 2025" therefore does not justify "2024 fee = 2025 fee". Full working in
-§5.5. Awaiting Sravya's confirmation, since the original instruction was to keep fees if
-the order spans several years.
+**Q1 — 2025 fee. → CONFIRMED CLOSED (2026-09-22): fee stays out, permanently.**
+Re-investigated in Phase 1. The official APHERMC order *is* a multi-year order covering
+the block period **2023-24 to 2025-26**, so it formally covers 2025. But the fee actually
+changed for **44.8% of colleges (112 of 250) between 2023 and 2024 inside that same
+block**, sometimes by 100%. "The block covers 2025" therefore does not justify "the 2024
+fee is the 2025 fee" — that inference is wrong for nearly half of all colleges. Sravya
+confirmed: keep fees out. Full working in §5.5.
 
 **Q2 — Backtest pairing. → Two folds.** Tune `t1,t2,t3` on Fold A (2023→2024, all
 categories comparable); validate on held-out Fold B (2024→2025, SC excluded and reported).
@@ -457,5 +476,5 @@ or an SC sub-category (§7.4).
 
 ### Still open
 
-**Q6 — Fee, final call.** See Q1 above. Default is to leave fee out; one word from
-Sravya flips it back on.
+*(Nothing blocking. Q6 — the fee question — was closed by Sravya on 2026-09-22: fees
+stay out, because they changed for 45% of colleges inside the fee block. See Q1.)*

@@ -29,10 +29,11 @@ SOURCES_MANIFEST: Path = RAW_DIR / "sources.json"
 CUTOFFS_PARQUET: Path = PROCESSED_DIR / "cutoffs.parquet"
 CUTOFFS_DB: Path = PROCESSED_DIR / "copilot.db"
 VALIDATION_REPORT: Path = PROCESSED_DIR / "validation_report.md"
+BACKTEST_REPORT: Path = REPO_ROOT / "docs" / "BACKTEST.md"
 
 BRANCH_MAP: Path = MAPPINGS_DIR / "branch_map.csv"
 COLLEGE_MAP: Path = MAPPINGS_DIR / "college_map.csv"
-CATEGORY_MAP: Path = MAPPINGS_DIR / "category_map.csv"
+THRESHOLDS: Path = MAPPINGS_DIR / "thresholds.json"
 
 # --- LLM (used from Phase 3) ------------------------------------------------
 # Never hardcode a model id. See CLAUDE.md.

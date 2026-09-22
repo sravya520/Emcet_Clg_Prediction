@@ -109,9 +109,15 @@ def recommend_options(
     branch: str | list[str] | None = None,
     district: str | list[str] | None = None,
     college_type: str | list[str] | None = None,
-    limit: int = 15,
+    per_band: int = 5,
 ) -> dict:
-    """Safe / Moderate / Reach options for one student. Calls the Stage 2 engine."""
+    """Safe / Moderate / Reach options for one student. Calls the Stage 2 engine.
+
+    Returns the top `per_band` options in each band, plus the TRUE total for
+    each band. The totals are counted before any trimming, so the student is
+    told "10 Moderate options, showing 5" rather than being quietly shown a
+    truncated list and told there were none.
+    """
 
     def as_list(value):
         if value is None:
@@ -127,7 +133,6 @@ def recommend_options(
             branch_codes=as_list(branch),
             districts=as_list(district),
             college_types=as_list(college_type),
-            limit=int(limit),
             cutoffs=cutoffs(),
         )
     except ValueError as error:
@@ -143,7 +148,14 @@ def recommend_options(
             "data_year": config.RECOMMEND_YEAR,
         }
 
-    counts = result["band"].value_counts().to_dict()
+    # Count every band BEFORE trimming, then trim for display.
+    counts = banding.band_counts(result)
+    shown = (
+        result.groupby("band", sort=False, group_keys=False)
+        .head(int(per_band))
+        .reset_index(drop=True)
+    )
+
     return {
         "data_year": int(result["data_year"].iloc[0]),
         "counselling_phase": str(result["counselling_phase"].iloc[0]),
@@ -153,13 +165,19 @@ def recommend_options(
             "gender": str(gender).upper(),
             "local_area": str(local_area).upper(),
         },
-        "counts": {band: int(counts.get(band, 0)) for band in ("Safe", "Moderate", "Reach")},
+        "total_options_per_band": counts,
+        "total_options": int(sum(counts.values())),
+        "showing_per_band": int(per_band),
+        "note_on_counts": (
+            "total_options_per_band is the full count. options[] lists only the "
+            f"top {int(per_band)} of each band, most competitive first."
+        ),
         "band_untested_for_category": bool(result["band_untested_for_category"].iloc[0]),
         "warning": (
             banding.SC_WARNING if result["band_untested_for_category"].iloc[0] else None
         ),
         "options": _records(
-            result,
+            shown,
             [
                 "band",
                 "college_code",
@@ -391,7 +409,10 @@ TOOL_DECLARATIONS: list[dict] = [
                     "items": {"type": "string"},
                     "description": "PVT, UNIV, SF, PU or SS",
                 },
-                "limit": {"type": "integer", "description": "How many to return (default 15)"},
+                "per_band": {
+                    "type": "integer",
+                    "description": "How many options to return in EACH band (default 5)",
+                },
             },
             "required": ["rank", "category", "gender", "local_area"],
         },

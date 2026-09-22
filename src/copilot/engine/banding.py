@@ -146,6 +146,7 @@ def recommend(
     year: int | None = None,
     thresholds: Thresholds | None = None,
     limit: int | None = None,
+    per_band_limit: int | None = None,
     cutoffs: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Return college-branch options labelled Safe / Moderate / Reach.
@@ -248,7 +249,29 @@ def recommend(
         "source_url",
     ]
     result = options[columns].reset_index(drop=True)
+
+    # Trim per band BEFORE any overall cap. A plain head() would hand every
+    # slot to Safe, because Safe sorts first - which is exactly how an earlier
+    # version came to report "15 Safe, 0 Moderate, 0 Reach" for a student who
+    # actually had 104 Safe, 10 Moderate and 3 Reach.
+    if per_band_limit:
+        result = (
+            result.groupby("band", sort=False, group_keys=False)
+            .head(per_band_limit)
+            .sort_values(
+                by=["band", "closing_rank"],
+                key=lambda s: s.map(order) if s.name == "band" else s,
+            )
+            .reset_index(drop=True)
+        )
+
     return result.head(limit) if limit else result
+
+
+def band_counts(frame: pd.DataFrame) -> dict[str, int]:
+    """True number of options per band. Must be taken BEFORE any trimming."""
+    counts = frame["band"].value_counts().to_dict() if not frame.empty else {}
+    return {band: int(counts.get(band, 0)) for band in ("Safe", "Moderate", "Reach")}
 
 
 def _empty_result() -> pd.DataFrame:

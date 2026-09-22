@@ -14,8 +14,11 @@ What is checked
 ---------------
 - college_code and branch_code on every recommendation
 - closing_rank and data_year on every recommendation
+- college_name on every recommendation, matched as a WHOLE name
 - any rank-sized number appearing in the free-text reply
+- rounded shorthand such as "46k" and approximations such as "about 46,000"
 - any token in the reply shaped like a college code
+- any multi-word phrase in the reply that reads like an institution name
 
 What is not checked
 -------------------
@@ -33,6 +36,23 @@ from copilot.agent.schemas import Answer, CheckedAnswer, RemovedItem
 
 #: A run of digits long enough to be a rank or a cutoff, with optional commas.
 NUMBER_PATTERN = re.compile(r"\b\d{1,3}(?:,\d{2,3})+\b|\b\d{4,7}\b")
+
+#: Shorthand like "46k" or "46K". Rounded, but still a claim about a cutoff,
+#: so it has to survive the same check as a precise number.
+SHORTHAND_NUMBER = re.compile(r"\b(\d{1,3})\s?[kK]\b")
+
+#: A phrase that reads like the name of an institution: a run of capitalised
+#: words containing one of these giveaways. Single words are handled elsewhere;
+#: this exists to catch a NAME assembled from words that are each real.
+#: "Aditya Engineering College" is built entirely from words the tools emitted,
+#: yet no such college was ever returned.
+NAME_KEYWORDS = (
+    "college", "institute", "university", "engineering", "technology",
+    "academy", "school", "polytechnic", "sciences",
+)
+NAME_PHRASE = re.compile(
+    r"\b(?:[A-Z][A-Za-z.&-]*\s+){1,7}[A-Z][A-Za-z.&-]*\b"
+)
 
 #: A bare token that looks like a college code: 3-8 capitals/digits. Deliberately
 #: loose, then filtered against a stop-list, because a missed fake code is worse
@@ -61,6 +81,8 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
     # college name - "ADITYA INSTITUTE OF TECHNOLOGY AND MGMT" - are not
     # mistaken for invented college codes when the model quotes the name back.
     words: set[str] = set()
+    # Full institution and branch names exactly as the tools gave them.
+    names: set[str] = set()
 
     def walk(node: Any, key: str | None = None) -> None:
         if isinstance(node, dict):
@@ -71,6 +93,8 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
                 walk(child, key)
         elif isinstance(node, str):
             words.update(re.findall(r"[A-Za-z0-9]+", node.upper()))
+            if key in ("college_name", "branch_name"):
+                names.add(_normalise_name(node))
             if key == "college_code":
                 colleges.add(node.upper())
             elif key == "branch_code":
@@ -102,7 +126,21 @@ def collect_facts(tool_results: list[dict[str, Any]]) -> dict[str, set]:
         "numbers": numbers,
         "years": years,
         "words": words,
+        "names": {n for n in names if n},
     }
+
+
+def _normalise_name(text: str) -> str:
+    """Upper-case, strip punctuation, squeeze spaces, so names compare fairly."""
+    return " ".join(re.findall(r"[A-Z0-9]+", str(text).upper()))
+
+
+def _name_is_vouched(phrase: str, names: set[str]) -> bool:
+    """True when this phrase is part of, or contains, a name a tool returned."""
+    candidate = _normalise_name(phrase)
+    if not candidate:
+        return True
+    return any(candidate in name or name in candidate for name in names)
 
 
 def _collect_year_keys(node: Any, years: set[int], numbers: set[int]) -> None:
@@ -139,6 +177,20 @@ def check(answer: Answer, tool_results: list[dict[str, Any]]) -> CheckedAnswer:
                     value=rec.college_code,
                     reason="college code did not appear in any tool result this turn",
                     where=where,
+                )
+            )
+            continue
+
+        if rec.college_name and not _name_is_vouched(rec.college_name, facts["names"]):
+            removed.append(
+                RemovedItem(
+                    kind="college",
+                    value=rec.college_name,
+                    reason=(
+                        "college name did not match any name a tool returned this "
+                        "turn (a name built from real words is still invented)"
+                    ),
+                    where=f"{where}.college_name",
                 )
             )
             continue
@@ -204,11 +256,17 @@ def _scrub_text(text: str, facts: dict[str, set]) -> tuple[str, list[RemovedItem
         # Small numbers are ordinary prose ("3 options", "top 5"), not claims.
         if value < 1000:
             return match.group(0)
+        near = any(abs(real - value) < 1000 for real in facts["numbers"])
         removed.append(
             RemovedItem(
                 kind="rank",
                 value=match.group(0),
-                reason="number in the reply did not appear in any tool result this turn",
+                reason=(
+                    "number in the reply is a rounded or approximate version of a "
+                    "real value, not the real value itself"
+                    if near
+                    else "number in the reply did not appear in any tool result this turn"
+                ),
                 where="reply",
             )
         )
@@ -235,6 +293,49 @@ def _scrub_text(text: str, facts: dict[str, set]) -> tuple[str, list[RemovedItem
         )
         return "[removed: unverified code]"
 
-    scrubbed = NUMBER_PATTERN.sub(replace_number, text)
+    def replace_shorthand(match):
+        value = int(match.group(1)) * 1000
+        # "46k" is a claim about a cutoff even though it is rounded. Accept it
+        # only if some real number rounds to it, otherwise it is an invention
+        # dressed up as an approximation.
+        if any(abs(real - value) < 1000 for real in facts["numbers"]):
+            return match.group(0)
+        removed.append(
+            RemovedItem(
+                kind="rank",
+                value=match.group(0),
+                reason=(
+                    "rounded number in the reply does not correspond to any value "
+                    "a tool returned this turn"
+                ),
+                where="reply",
+            )
+        )
+        return "[removed: unverified number]"
+
+    def replace_name(match):
+        phrase = match.group(0)
+        if not any(word in phrase.lower() for word in NAME_KEYWORDS):
+            return phrase
+        if _name_is_vouched(phrase, facts["names"]):
+            return phrase
+        removed.append(
+            RemovedItem(
+                kind="college",
+                value=phrase,
+                reason=(
+                    "name in the reply did not match any name a tool returned this "
+                    "turn (every word may be real while the name is not)"
+                ),
+                where="reply",
+            )
+        )
+        return "[removed: unverified name]"
+
+    # Names first: they contain capitalised words the code check would otherwise
+    # pick at one at a time, and numbers the number check would look at.
+    scrubbed = NAME_PHRASE.sub(replace_name, text)
+    scrubbed = SHORTHAND_NUMBER.sub(replace_shorthand, scrubbed)
+    scrubbed = NUMBER_PATTERN.sub(replace_number, scrubbed)
     scrubbed = CODE_PATTERN.sub(replace_code, scrubbed)
     return scrubbed, removed

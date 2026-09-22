@@ -193,7 +193,7 @@ def test_a_bad_band_is_rejected_by_the_schema():
 
 @pytest.fixture(scope="module")
 def real_result():
-    return tools.recommend_options(34000, "OC", "BOYS", "AU", branch=["CSE"], limit=3)
+    return tools.recommend_options(34000, "OC", "BOYS", "AU", branch=["CSE"], per_band=3)
 
 
 def test_an_invented_college_is_removed(real_result):
@@ -310,19 +310,19 @@ def test_the_prompt_forbids_fees_placements_and_quality():
 
 
 def test_sc_students_get_a_warning_from_the_tool():
-    result = tools.recommend_options(45_000, "SC-I", "BOYS", "AU", limit=3)
+    result = tools.recommend_options(45_000, "SC-I", "BOYS", "AU", per_band=3)
     assert result["band_untested_for_category"] is True
     assert result["warning"] and "could not be tested" in result["warning"]
 
 
 def test_non_sc_students_get_no_warning():
-    result = tools.recommend_options(45_000, "BC-B", "BOYS", "AU", limit=3)
+    result = tools.recommend_options(45_000, "BC-B", "BOYS", "AU", per_band=3)
     assert result["band_untested_for_category"] is False
     assert result["warning"] is None
 
 
 def test_every_recommendation_carries_its_data_year():
-    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", limit=5)
+    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", per_band=5)
     assert result["data_year"] == 2025
     assert all(option["data_year"] == 2025 for option in result["options"])
 
@@ -356,3 +356,117 @@ def test_explain_bands_reads_measured_numbers_not_hardcoded_ones():
 )
 def test_category_spellings(written, expected):
     assert tools.normalise_category(written) == expected
+
+
+# --- Checker: invented names and rounded numbers ----------------------------
+#
+# The loophole these close: the checker used to trust any WORD the tools had
+# emitted. "Aditya Engineering College" is built entirely from words that appear
+# in real tool output, yet no such college was ever returned.
+
+
+def test_a_name_built_from_real_words_is_still_removed(real_result):
+    """Every word is real. The name is not. It must not survive."""
+    answer = Answer(reply="You should look at Aditya Engineering College for CSE.")
+    checked = verify.check(answer, [real_result])
+    assert "Aditya Engineering College" not in checked.answer.reply
+    assert not checked.passed_clean
+    assert any("did not match any name" in item.reason for item in checked.removed)
+
+
+def test_an_invented_name_on_a_recommendation_is_removed(real_result):
+    """A real college code paired with a made-up name is still a fabrication."""
+    option = real_result["options"][0]
+    answer = Answer(
+        reply="ok",
+        recommendations=[
+            Recommendation(
+                college_code=option["college_code"],
+                college_name="Aditya Engineering College",  # not what the tool said
+                branch_code=option["branch_code"],
+                band="Safe",
+                closing_rank=option["closing_rank"],
+                data_year=option["data_year"],
+                why="name is wrong",
+            )
+        ],
+    )
+    checked = verify.check(answer, [real_result])
+    assert checked.answer.recommendations == []
+    assert any(item.where.endswith("college_name") for item in checked.removed)
+
+
+def test_the_real_full_name_survives(real_result):
+    option = real_result["options"][0]
+    answer = Answer(reply=f"{option['college_name']} is worth a look.")
+    checked = verify.check(answer, [real_result])
+    assert option["college_name"] in checked.answer.reply
+    assert checked.passed_clean, checked.removed
+
+
+def test_shorthand_k_numbers_are_checked(real_result):
+    """'46k' is rounded, but it is still a claim about a cutoff."""
+    answer = Answer(reply="That one closed around 93k last year.")
+    checked = verify.check(answer, [real_result])
+    assert "93k" not in checked.answer.reply
+    assert any(item.kind == "rank" for item in checked.removed)
+
+
+def test_shorthand_k_close_to_a_real_number_is_allowed(real_result):
+    real = real_result["options"][0]["closing_rank"]
+    answer = Answer(reply=f"That one closed around {round(real / 1000)}k last year.")
+    checked = verify.check(answer, [real_result])
+    assert "k last year" in checked.answer.reply
+
+
+def test_an_approximate_number_is_flagged_as_approximate(real_result):
+    """'about 46,000' when the real figure is 46,204 is not the real figure."""
+    real = real_result["options"][0]["closing_rank"]
+    rounded = (real // 1000) * 1000
+    assert rounded != real, "pick a fixture whose cutoff is not a round thousand"
+    answer = Answer(reply=f"The cutoff was about {rounded:,} last year.")
+    checked = verify.check(answer, [real_result])
+    assert f"{rounded:,}" not in checked.answer.reply
+    assert any("rounded or approximate" in item.reason for item in checked.removed)
+
+
+def test_branch_names_in_prose_are_not_false_positives(real_result):
+    """'Computer Science and Engineering' is a real branch name from the tool."""
+    answer = Answer(reply="These are all Computer Science and Engineering seats.")
+    checked = verify.check(answer, [real_result])
+    assert "Computer Science and Engineering" in checked.answer.reply
+    assert checked.passed_clean, checked.removed
+
+
+# --- Counts per band --------------------------------------------------------
+
+
+def test_band_counts_are_the_true_totals_not_the_trimmed_ones():
+    """The bug this pins: reporting 15 Safe / 0 Moderate / 0 Reach when the
+    student actually had 104 / 10 / 3, because the limit was applied first."""
+    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", branch=["CSE"], per_band=5)
+    totals = result["total_options_per_band"]
+    assert totals["Safe"] > 5
+    assert totals["Moderate"] > 0
+    assert totals["Reach"] > 0
+    assert result["total_options"] == sum(totals.values())
+
+
+def test_every_band_is_represented_in_the_returned_options():
+    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", branch=["CSE"], per_band=5)
+    shown = {option["band"] for option in result["options"]}
+    assert shown == {"Safe", "Moderate", "Reach"}
+
+
+def test_at_most_per_band_options_are_returned_for_each_band():
+    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", branch=["CSE"], per_band=3)
+    from collections import Counter
+
+    counts = Counter(option["band"] for option in result["options"])
+    assert all(count <= 3 for count in counts.values())
+
+
+def test_options_are_still_most_competitive_first_within_a_band():
+    result = tools.recommend_options(34_000, "OC", "BOYS", "AU", branch=["CSE"], per_band=5)
+    safe = [o["closing_rank"] for o in result["options"] if o["band"] == "Safe"]
+    assert safe == sorted(safe)

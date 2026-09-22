@@ -280,7 +280,7 @@ def ask(question: str, client: GeminiClient | None = None, max_steps: int | None
         return turn
 
     answer = _parse_answer(turn.raw_reply)
-    checked = verify.check(answer, turn.tool_results)
+    checked = verify.check(answer, turn.tool_results, question=question)
     checked.tool_calls = turn.tool_calls
     checked.steps_used = turn.steps_used
     turn.checked = checked

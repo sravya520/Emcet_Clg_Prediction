@@ -553,3 +553,34 @@ def test_a_year_used_as_an_int_key_is_trusted():
     checked = verify.check(answer, [result])
     assert "2023" in checked.answer.reply and "2024" in checked.answer.reply
     assert checked.passed_clean, checked.removed
+
+
+# --- The student's own rank is not an invention -----------------------------
+
+
+def test_the_students_own_rank_survives_in_the_reply(real_result):
+    """"Based on your rank of [removed: unverified number]" is a bug.
+
+    The rank came from the student. Repeating it back is not a fabrication.
+    """
+    question = "my rank is 99999999, OC boy AU, what can I get?"
+    answer = Answer(reply="Based on your rank of 99999999 I found no options.")
+    checked = verify.check(answer, [real_result], question=question)
+    assert "99999999" in checked.answer.reply
+    assert checked.passed_clean, checked.removed
+
+
+def test_a_number_not_in_the_question_is_still_removed(real_result):
+    """Trusting the question must not become a way in for anything else."""
+    question = "my rank is 40000, OC boy AU"
+    answer = Answer(reply="With rank 40000 you could get into somewhere that closed at 77777.")
+    checked = verify.check(answer, [real_result], question=question)
+    assert "40000" in checked.answer.reply
+    assert "77777" not in checked.answer.reply
+
+
+def test_commas_in_the_question_are_matched_without_them_in_the_reply(real_result):
+    question = "my rank is 40,000 - OC boy AU"
+    answer = Answer(reply="Your rank of 40000 is workable.")
+    checked = verify.check(answer, [real_result], question=question)
+    assert "40000" in checked.answer.reply

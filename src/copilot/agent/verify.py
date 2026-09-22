@@ -196,9 +196,26 @@ def _as_int(text: str) -> int | None:
     return int(digits) if digits.isdigit() else None
 
 
-def check(answer: Answer, tool_results: list[dict[str, Any]]) -> CheckedAnswer:
-    """Strip anything the tools did not say, and record every removal."""
+def check(
+    answer: Answer,
+    tool_results: list[dict[str, Any]],
+    question: str | None = None,
+) -> CheckedAnswer:
+    """Strip anything the tools did not say, and record every removal.
+
+    ``question`` is the student's own message. Numbers they supplied - their
+    rank, above all - are facts they gave us, not claims we invented, so the
+    answer is allowed to repeat them. Without this the checker produced
+    "Based on your rank of [removed: unverified number]", which is both wrong
+    and alarming: it looks like the system lost the number the student just
+    typed.
+    """
     facts = collect_facts(tool_results)
+    if question:
+        for token in NUMBER_PATTERN.findall(question):
+            value = _as_int(token)
+            if value is not None:
+                facts["numbers"].add(value)
     removed: list[RemovedItem] = []
     kept: list = []
 

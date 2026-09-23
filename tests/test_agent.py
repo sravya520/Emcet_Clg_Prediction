@@ -584,3 +584,37 @@ def test_commas_in_the_question_are_matched_without_them_in_the_reply(real_resul
     answer = Answer(reply="Your rank of 40000 is workable.")
     checked = verify.check(answer, [real_result], question=question)
     assert "40000" in checked.answer.reply
+
+
+def test_a_college_code_from_the_question_survives(real_result):
+    """Asked "is ADIT a good college?", the agent correctly answers without
+    calling a tool, because quality is not in the data. The checker then used
+    to delete ADIT from that reply, even though the student typed it."""
+    question = "is ADIT a good college? should I pick it?"
+    answer = Answer(reply="I have no data on whether ADIT is good. I only hold closing ranks.")
+    checked = verify.check(answer, [], question=question)
+    assert "ADIT" in checked.answer.reply
+    assert checked.passed_clean, checked.removed
+
+
+def test_a_code_not_in_the_question_is_still_removed(real_result):
+    """Trusting the question must not become a way in for anything else.
+
+    Note the fake code is 5 characters. The prose scanner only inspects tokens
+    of 3 to 8 characters, because that is the length real college codes run to
+    (ADIT, GVPW, MBUTPU1). A longer invented token would slip past the prose
+    scan - though not past the recommendations check, which matches exactly.
+    """
+    question = "is ADIT a good college?"
+    answer = Answer(reply="ADIT is fine, and so is FAKE9.")
+    checked = verify.check(answer, [], question=question)
+    assert "ADIT" in checked.answer.reply
+    assert "FAKE9" not in checked.answer.reply
+
+
+def test_trusting_the_question_does_not_let_a_whole_name_through(real_result):
+    """Quoting the question back is fine. Inventing a college is not."""
+    question = "what about colleges in Visakhapatnam?"
+    answer = Answer(reply="Try Visakhapatnam Institute of Engineering.")
+    checked = verify.check(answer, [real_result], question=question)
+    assert "Visakhapatnam Institute of Engineering" not in checked.answer.reply

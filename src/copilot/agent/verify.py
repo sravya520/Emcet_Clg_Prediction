@@ -212,10 +212,19 @@ def check(
     """
     facts = collect_facts(tool_results)
     if question:
+        # Anything the student typed is a fact they gave us, not a claim we
+        # invented, so the answer may repeat it back.
         for token in NUMBER_PATTERN.findall(question):
             value = _as_int(token)
             if value is not None:
                 facts["numbers"].add(value)
+        # Codes and words too, not just numbers. Asked "is ADIT a good
+        # college?", the agent answers without calling a tool - correctly,
+        # since quality is not in the data - and the checker then deleted
+        # ADIT from its own reply because no tool had returned it.
+        for word in re.findall(r"[A-Za-z0-9]+", question.upper()):
+            facts["words"].add(word)
+        facts["names"].add(_normalise_name(question))
     removed: list[RemovedItem] = []
     kept: list = []
 

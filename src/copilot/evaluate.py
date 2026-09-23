@@ -178,6 +178,14 @@ def summarise(results: list[CaseResult]) -> dict:
         # Which version of the code produced this. A result is only meaningful
         # alongside the code that made it.
         "code_commit": _code_commit(),
+        # WHERE it ran. The agent is exercised directly in-process, not through
+        # the deployed service, so these numbers describe the agent - not the
+        # hosted site's response time, which would also include Render's cold
+        # start and network hops.
+        "run_environment": (
+            "local development machine, agent called in-process "
+            "(NOT the deployed Render service)"
+        ),
         "cases_total": len(results),
         "cases_answered": len(done),
         "cases_errored": len(failed),
@@ -202,6 +210,8 @@ def summarise(results: list[CaseResult]) -> dict:
             sum(1 for r in done if r.removed_count > 0), len(done)
         ),
         "total_items_removed": sum(r.removed_count for r in done),
+        "slowest_case_id": max(done, key=lambda r: r.seconds).id if done else None,
+        "fastest_seconds": round(min(seconds), 2) if seconds else None,
         "avg_seconds_per_answer": round(statistics.mean(seconds), 2) if seconds else None,
         "median_seconds_per_answer": round(statistics.median(seconds), 2) if seconds else None,
         "slowest_seconds": round(max(seconds), 2) if seconds else None,
@@ -238,7 +248,10 @@ def render(summary: dict, results: list[CaseResult]) -> str:
             "",
         ]
     lines += [
-        "## Results",
+        "## Quality - the headline numbers",
+        "",
+        "These describe how well the agent behaves, and do not depend on how "
+        "fast the network was on the day.",
         "",
         "| Measure | Result |",
         "|---|---|",
@@ -252,10 +265,26 @@ def render(summary: dict, results: list[CaseResult]) -> str:
         f"**{summary['turns_where_checker_removed_something']}** of "
         f"{summary['cases_answered']} ({summary['checker_removal_rate_pct']}%) |",
         f"| Total items removed | **{summary['total_items_removed']}** |",
-        f"| Average time per answer | **{summary['avg_seconds_per_answer']}s** |",
-        f"| Median / slowest | {summary['median_seconds_per_answer']}s / "
-        f"{summary['slowest_seconds']}s |",
         f"| Average steps per answer | {summary['avg_steps']} |",
+        "",
+        "## Latency - reported separately, because the conditions matter",
+        "",
+        f"**Where this ran:** {summary['run_environment']}.",
+        "",
+        f"| | seconds |",
+        f"|---|---|",
+        f"| Median | **{summary['median_seconds_per_answer']}** |",
+        f"| Average | **{summary['avg_seconds_per_answer']}** |",
+        f"| Fastest | {summary['fastest_seconds']} |",
+        f"| Slowest | {summary['slowest_seconds']} (`{summary['slowest_case_id']}`) |",
+        "",
+        "The average sits well above the median because a few answers spent "
+        "most of their time inside Tenacity's backoff, waiting out dropped "
+        "connections and rate limits, rather than waiting for the model. "
+        "**That waiting is included on purpose** - it is what a user would "
+        "actually have experienced - but it means these figures describe the "
+        "network on the day as much as the agent. No data points were removed "
+        "to make the average look better.",
         "",
         "## Cost",
         "",

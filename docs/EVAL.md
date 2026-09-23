@@ -3,25 +3,29 @@
 Produced by `python -m copilot.evaluate` against the real Gemini API. Every number is counted from an actual run; none is estimated.
 
 - Model: **gemini-3.5-flash-lite**
-- Questions: **30** (30 answered, 0 errored)
-- Coverage: **100.0%**
-- Code version: `ec1e647`
+- Questions: **30** (21 answered, 9 errored)
+- Coverage: **70.0%**
+- Code version: `8edd556`
 
-> **Run note:** **PRE-FIX RUN (2026-09-22).** Recorded before commit 08d7b13, which stopped the checker deleting the student's own rank. Both of the two checker removals below are that false positive, so the 6.7% removal rate reflects checker behaviour that has since been fixed. Kept unchanged rather than re-run, so the improvement is visible as a before/after. A clean post-fix run happens once the app is finished and the code stops changing.
+> ## INCOMPLETE RUN - THESE NUMBERS ARE NOT REPORTABLE
+>
+> Only 21 of 30 questions were answered (70.0% coverage). The percentages below are computed over the answered subset only and must not be quoted as the agent's accuracy.
+>
+> Failures by kind: `{'RemoteProtocolError': 3, 'ConnectError': 6}`
 
 ## Results
 
 | Measure | Result |
 |---|---|
-| Correct tool chosen | **93.3%** |
-| Out-of-scope handled honestly | **100.0%** (7 questions) |
-| SC answers carrying the warning | **100.0%** (3 questions) |
+| Correct tool chosen | **95.2%** |
+| Out-of-scope handled honestly | **100.0%** (1 questions) |
+| SC answers carrying the warning | **None%** (0 questions) |
 | Answer in the right format | **100.0%** |
-| Turns where the checker removed something | **2** of 30 (6.7%) |
-| Total items removed | **2** |
-| Average time per answer | **18.55s** |
-| Median / slowest | 13.41s / 57.98s |
-| Average steps per answer | 1.93 |
+| Turns where the checker removed something | **0** of 21 (0.0%) |
+| Total items removed | **0** |
+| Average time per answer | **76.12s** |
+| Median / slowest | 57.14s / 215.39s |
+| Average steps per answer | 1.95 |
 
 ## Cost
 
@@ -31,37 +35,46 @@ Free tier, so the money cost of this run was **nothing**. The real constraint is
 
 | id | kind | tool expected | tool called | ok | format | honest | SC warn | removed | secs |
 |---|---|---|---|---|---|---|---|---|---|
-| n01 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 42.62 |
-| n02 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 20.55 |
-| n03 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 18.08 |
-| n04 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 19.77 |
-| n05 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 18.7 |
-| f01 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 11.78 |
-| f02 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 10.69 |
-| f03 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 5.39 |
-| f04 | filter_district | recommend_options | recommend_options | yes | yes | - | - | 0 | 6.59 |
-| f05 | filter_district | recommend_options | recommend_options | yes | yes | - | - | 0 | 6.31 |
-| c01 | compare | compare_options | get_option_details, get_option_details, compare_options | yes | yes | - | - | 0 | 5.64 |
-| c02 | compare | compare_options | get_option_details, get_option_details | **NO** | yes | - | - | 0 | 3.83 |
-| c03 | compare | compare_options | compare_options | yes | yes | - | - | 0 | 2.81 |
-| d01 | details | get_option_details | get_option_details | yes | yes | - | - | 0 | 4.08 |
-| d02 | details | get_option_details | get_option_details | yes | yes | - | - | 0 | 2.53 |
-| e01 | explain | explain_bands | explain_bands | yes | yes | - | - | 0 | 5.19 |
-| e02 | explain | explain_bands | explain_bands | yes | yes | - | - | 0 | 2.89 |
-| o01 | out_of_scope | (none) | get_option_details | yes | yes | yes | - | 0 | 3.86 |
-| o02 | out_of_scope | (none) | (none) | yes | yes | yes | - | 0 | 2.03 |
-| o03 | out_of_scope | (none) | (none) | yes | yes | yes | - | 0 | 11.16 |
-| o04 | out_of_scope | (none) | (none) | yes | yes | yes | - | 0 | 22.05 |
-| o05 | out_of_scope | (none) | (none) | yes | yes | yes | - | 0 | 21.58 |
-| s01 | sc | recommend_options | recommend_options | yes | yes | - | yes | 0 | 57.98 |
-| s02 | sc | recommend_options | recommend_options | yes | yes | - | yes | 0 | 51.3 |
-| s03 | sc | recommend_options | explain_bands | **NO** | yes | - | yes | 0 | 39.25 |
-| t01 | tricky | (none) | recommend_options | yes | yes | - | - | 0 | 34.88 |
-| t02 | tricky | (none) | (none) | yes | yes | yes | - | 0 | 15.05 |
-| t03 | tricky | recommend_options | recommend_options | yes | yes | - | - | 1 | 31.62 |
-| t04 | tricky | recommend_options, get_option_details, compare_options | get_option_details | yes | yes | - | - | 1 | 32.67 |
-| t05 | tricky | (none) | recommend_options | yes | yes | yes | - | 0 | 45.48 |
+| n01 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 35.86 |
+| n02 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 51.3 |
+| n03 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 39.91 |
+| n04 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 39.41 |
+| n05 | normal | recommend_options | recommend_options | yes | yes | - | - | 0 | 57.14 |
+| f01 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 101.81 |
+| f02 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 23.39 |
+| f03 | filter_branch | recommend_options | recommend_options | yes | yes | - | - | 0 | 31.09 |
+| f04 | filter_district | recommend_options | recommend_options | yes | yes | - | - | 0 | 96.86 |
+| f05 | filter_district | recommend_options | recommend_options | yes | yes | - | - | 0 | 108.2 |
+| c01 | compare | compare_options | compare_options | yes | yes | - | - | 0 | 153.34 |
+| c02 | compare | compare_options | get_option_details, get_option_details | **NO** | yes | - | - | 0 | 96.75 |
+| c03 | compare | compare_options | compare_options | yes | yes | - | - | 0 | 43.8 |
+| d01 | details | get_option_details | get_option_details | yes | yes | - | - | 0 | 64.02 |
+| d02 | details | get_option_details | get_option_details | yes | yes | - | - | 0 | 215.39 |
+| e01 | explain | explain_bands | explain_bands | yes | yes | - | - | 0 | 39.0 |
+| e02 | explain | explain_bands | explain_bands | yes | yes | - | - | 0 | 47.2 |
+| o01 | out_of_scope | (none) | (none) | **NO** | **NO** | - | - | 0 | 53.59 |
+| o02 | out_of_scope | (none) | (none) | **NO** | **NO** | - | - | 0 | 12.06 |
+| o03 | out_of_scope | (none) | (none) | **NO** | **NO** | - | - | 0 | 4.05 |
+| o04 | out_of_scope | (none) | (none) | **NO** | **NO** | - | - | 0 | 14.5 |
+| o05 | out_of_scope | (none) | (none) | **NO** | **NO** | - | - | 0 | 13.81 |
+| s01 | sc | recommend_options | (none) | **NO** | **NO** | - | - | 0 | 12.91 |
+| s02 | sc | recommend_options | (none) | **NO** | **NO** | - | - | 0 | 10.78 |
+| s03 | sc | recommend_options | (none) | **NO** | **NO** | - | - | 0 | 11.7 |
+| t01 | tricky | (none) | recommend_options | yes | yes | - | - | 0 | 82.73 |
+| t02 | tricky | (none) | (none) | yes | yes | yes | - | 0 | 17.86 |
+| t03 | tricky | recommend_options | recommend_options | yes | yes | - | - | 0 | 94.38 |
+| t04 | tricky | recommend_options, get_option_details, compare_options | get_option_details | yes | yes | - | - | 0 | 159.0 |
+| t05 | tricky | (none) | (none) | **NO** | **NO** | - | - | 0 | 41.76 |
 
 ## Notes
 
-No question errored.
+Questions that errored:
+- `o01`: RemoteProtocolError: Server disconnected without sending a response.
+- `o02`: ConnectError: [Errno 11001] getaddrinfo failed
+- `o03`: ConnectError: [Errno 11001] getaddrinfo failed
+- `o04`: RemoteProtocolError: Server disconnected without sending a response.
+- `o05`: ConnectError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)
+- `s01`: ConnectError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)
+- `s02`: ConnectError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)
+- `s03`: ConnectError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)
+- `t05`: RemoteProtocolError: Server disconnected without sending a response.

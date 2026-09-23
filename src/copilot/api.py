@@ -60,6 +60,33 @@ class ChatRequest(BaseModel):
 # --- The deterministic half -------------------------------------------------
 
 
+@app.get("/")
+def index() -> dict:
+    """What lives here, for anyone who opens the API root in a browser.
+
+    Worth having: the API has no web page, so a bare 404 here is genuinely
+    confusing - it reads as "the service is broken" when the service is fine
+    and you are simply at the wrong address. Say where the app is instead.
+    """
+    return {
+        "service": "Counselling Copilot API",
+        "note": (
+            "This is the API, not the app. There is no web page at this "
+            "address. Open the Streamlit interface instead."
+        ),
+        "the_app_is_at": "http://127.0.0.1:8501 (local) - see /docs to explore this API",
+        "endpoints": {
+            "GET /docs": "interactive API explorer",
+            "GET /health": "is the service up, and is chat usable",
+            "GET /meta": "data year, band limits, measured accuracy, disclaimers",
+            "GET /filters": "dropdown values for the form",
+            "POST /recommend": "Safe/Moderate/Reach - deterministic, no AI",
+            "POST /chat": "the agent",
+        },
+        "data_year": config.RECOMMEND_YEAR,
+    }
+
+
 @app.get("/health")
 def health() -> dict:
     """Up, and is chat usable? The form does not depend on any of this."""

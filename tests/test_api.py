@@ -197,3 +197,15 @@ def test_the_container_entrypoint_starts_both_and_waits():
     # Render assigns the public port; the API port stays internal.
     assert "${PORT:-8501}" in script
     assert "127.0.0.1:${API_PORT}" in script
+
+
+def test_the_api_root_explains_itself_instead_of_404ing():
+    """A bare 404 at the API root reads as "the service is broken" when the
+    service is fine and you are simply at the wrong address. This cost real
+    confusion twice: once on Render, once locally."""
+    response = client.get("/")
+    assert response.status_code == 200
+    body = response.json()
+    assert "not the app" in body["note"]
+    assert "8501" in body["the_app_is_at"]
+    assert "POST /recommend" in body["endpoints"]

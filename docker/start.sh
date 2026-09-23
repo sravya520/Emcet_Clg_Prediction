@@ -40,10 +40,12 @@ while [ "${i}" -lt 60 ]; do
 done
 
 echo "starting UI on 0.0.0.0:${PUBLIC_PORT} (public)"
+# CORS and XSRF protection are left at their defaults (both on). Streamlit
+# disables XSRF if CORS is turned off, so the "helpful" pair of flags people
+# copy for proxied deploys quietly removes a protection. Render terminates TLS
+# and forwards the Host header intact, so the defaults work as they are.
 exec streamlit run src/copilot/ui.py \
     --server.port "${PUBLIC_PORT}" \
     --server.address 0.0.0.0 \
     --server.headless true \
-    --server.enableCORS false \
-    --server.enableXsrfProtection true \
     --browser.gatherUsageStats false

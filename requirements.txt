@@ -13,4 +13,10 @@ tenacity>=9.0      # retries on transient API errors
 python-dotenv>=1.0 # reads .env
 truststore>=0.9    # trust the OS cert store too, for TLS-inspecting networks
 
+# Phase 4: the app
+fastapi>=0.115    # the API
+uvicorn[standard]>=0.30  # serves it
+streamlit>=1.38   # the UI
+httpx>=0.27       # the UI calls the API over HTTP, like any other client
+
 pytest>=8.0

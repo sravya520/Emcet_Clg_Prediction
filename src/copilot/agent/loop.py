@@ -122,6 +122,53 @@ class Turn:
     raw_reply: str = ""
 
 
+#: What went wrong, in terms a student can act on. Out of quota and a bad key
+#: both read as "it's broken", but they need completely different actions from
+#: the person, so the app must never collapse them into one message.
+ERROR_KINDS = {
+    "quota": (
+        "I have reached today's chat limit. The search form still works and "
+        "uses exactly the same data - please use that."
+    ),
+    "auth": (
+        "The chat is not set up correctly: the API key was rejected. The search "
+        "form still works and needs no key."
+    ),
+    "unavailable": (
+        "The AI service is busy right now. Please try again in a minute, or use "
+        "the search form, which does not need it."
+    ),
+    "offline": (
+        "I could not reach the AI service. Check the internet connection, or use "
+        "the search form, which works offline."
+    ),
+    "not_configured": (
+        "Chat is switched off because no API key is configured. The search form "
+        "works without one."
+    ),
+    "other": (
+        "Something went wrong with the chat. The search form still works and "
+        "uses the same data."
+    ),
+}
+
+
+def classify_error(message: str) -> str:
+    """Turn an exception message into one of ERROR_KINDS."""
+    text = (message or "").lower()
+    if "429" in text or "resource_exhausted" in text or "quota" in text:
+        return "quota"
+    if "401" in text or "unauthenticated" in text or "api key" in text or "permission_denied" in text or "403" in text:
+        return "auth"
+    if "missing gemini_api_key" in text or "missing gemini_model" in text:
+        return "not_configured"
+    if "503" in text or "unavailable" in text or "overloaded" in text or "500" in text:
+        return "unavailable"
+    if "connect" in text or "dns" in text or "ssl" in text or "timeout" in text:
+        return "offline"
+    return "other"
+
+
 def _is_transient(error: Exception) -> bool:
     text = f"{type(error).__name__}: {error}".lower()
     markers = (

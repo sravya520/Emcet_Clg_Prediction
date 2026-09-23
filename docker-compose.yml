@@ -1,0 +1,39 @@
+# Two services from one image. Run both with:  docker compose up --build
+#
+# The UI talks to the API over HTTP, exactly as it does in production, so what
+# you see locally is what gets deployed. The UI holds no data of its own.
+
+services:
+  api:
+    build: .
+    image: counselling-copilot
+    ports:
+      - "8000:8000"
+    environment:
+      # Passed through from your shell or .env. Absent is fine: the form works
+      # without a key, and /chat then reports that chat is switched off.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      MAX_AGENT_STEPS: ${MAX_AGENT_STEPS:-5}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ui:
+    build: .
+    image: counselling-copilot
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8501:8501"
+    environment:
+      COPILOT_API_URL: http://api:8000
+    command: >
+      streamlit run src/copilot/ui.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true

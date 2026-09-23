@@ -16,6 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY data/ ./data/
 COPY evals/ ./evals/
+COPY docker/ ./docker/
+RUN chmod +x docker/start.sh
 
 ENV PYTHONPATH=/app/src \
     PYTHONUNBUFFERED=1 \
@@ -32,9 +34,12 @@ USER app
 
 EXPOSE 8000 8501
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:${PORT:-8000}/health || exit 1
+# The API is internal, so the healthcheck asks IT, not the UI: if the thing
+# that actually holds the data is alive, the service is alive.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:${API_PORT:-8000}/health || exit 1
 
-# Default role is the API. docker-compose overrides this for the UI.
-# $PORT is honoured because Render and similar hosts assign it.
-CMD ["sh", "-c", "uvicorn copilot.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Default: both processes in one container, which is what Render runs on its
+# single public port. docker-compose overrides this to run them as two
+# services locally, so both shapes stay exercised.
+CMD ["./docker/start.sh"]

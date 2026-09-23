@@ -1,0 +1,39 @@
+# Render blueprint. One service, one container, one cold start.
+#
+# Splitting the API and the UI across two free services would mean the visitor
+# waits for TWO sleeping containers to wake, one after the other. One service
+# keeps it to a single wake-up and still deploys the API for real: the UI calls
+# it over HTTP inside the container.
+#
+# The Gemini key is NOT in this file and never goes in the repo. It is marked
+# sync:false, which tells Render to ask for it in the dashboard instead.
+
+services:
+  - type: web
+    name: counselling-copilot
+    runtime: docker
+    plan: free
+    region: singapore          # closest Render region to Andhra Pradesh
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      # Entered by hand in the Render dashboard. sync:false means "prompt me,
+      # do not read this from the repo".
+      - key: GEMINI_API_KEY
+        sync: false
+
+      # Safe to keep in the repo: a model name is not a secret.
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+
+      - key: MAX_AGENT_STEPS
+        value: "5"
+
+      # The internal port the API listens on. Render supplies $PORT for the
+      # public side; this one is never exposed.
+      - key: API_PORT
+        value: "8000"
+
+      - key: PYTHONUNBUFFERED
+        value: "1"

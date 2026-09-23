@@ -9,6 +9,10 @@ services:
     image: counselling-copilot
     ports:
       - "8000:8000"
+    # Locally we run the API as its own service, so the compose file exercises
+    # the split shape while Render runs the combined one.
+    command: >
+      uvicorn copilot.api:app --host 0.0.0.0 --port 8000
     environment:
       # Passed through from your shell or .env. Absent is fine: the form works
       # without a key, and /chat then reports that chat is switched off.

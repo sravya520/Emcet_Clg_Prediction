@@ -12,6 +12,7 @@ Run:  streamlit run src/copilot/ui.py
 from __future__ import annotations
 
 import os
+import time
 
 import httpx
 import streamlit as st
@@ -62,6 +63,54 @@ def load_filters() -> dict | None:
 
 def load_health() -> dict | None:
     return api_get("/health")
+
+
+#: How long to keep waiting for the API before giving up, in seconds.
+#: A free Render service sleeps after 15 minutes idle and takes roughly a
+#: minute to wake, so anything less than this reports a dead site when the
+#: site is merely asleep.
+WAKE_TIMEOUT = 90
+
+
+def wait_for_api() -> dict | None:
+    """Poll /health, telling the visitor what is happening while we wait.
+
+    On a free host the first visitor after an idle period waits about a minute
+    for the container to start. A blank page or a bare error for that whole
+    minute reads as "this project is broken", which is the wrong conclusion
+    about a service that is simply asleep. So we say so, and count.
+    """
+    health = load_health()
+    if health is not None:
+        return health
+
+    placeholder = st.empty()
+    progress = st.progress(0.0)
+    with placeholder.container():
+        st.info(
+            "**Waking up the free server. This takes up to a minute.**\n\n"
+            "This app is hosted on a free plan that puts the server to sleep "
+            "when nobody has used it for a while. Nothing is broken - the first "
+            "visit after a quiet spell just has to wait for it to start.",
+            icon="😴",
+        )
+    status = st.empty()
+
+    for second in range(WAKE_TIMEOUT):
+        health = load_health()
+        if health is not None:
+            placeholder.empty()
+            progress.empty()
+            status.empty()
+            return health
+        progress.progress(min((second + 1) / WAKE_TIMEOUT, 1.0))
+        status.caption(f"Still waiting... {second + 1}s of up to {WAKE_TIMEOUT}s")
+        time.sleep(1)
+
+    placeholder.empty()
+    progress.empty()
+    status.empty()
+    return None
 
 
 # --- Shared furniture -------------------------------------------------------

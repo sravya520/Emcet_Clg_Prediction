@@ -149,3 +149,51 @@ def test_chat_says_so_when_no_key_is_configured(monkeypatch):
 )
 def test_error_classification(message, expected):
     assert classify_error(message) == expected
+
+
+# --- Cold start -------------------------------------------------------------
+
+
+def test_the_ui_waits_and_explains_instead_of_showing_an_error():
+    """A free host sleeps after 15 minutes. The first visitor then waits about
+    a minute. A blank page for that minute reads as 'this project is broken',
+    which is the wrong conclusion about a service that is merely asleep."""
+    from copilot import ui
+
+    assert ui.WAKE_TIMEOUT >= 60, "shorter than a cold start, so it would give up too early"
+
+    import inspect
+    source = inspect.getsource(ui.wait_for_api)
+    assert "Waking up the free server" in source
+    assert "takes up to a minute" in source
+    # It must poll rather than check once and give up.
+    assert "for second in range" in source
+
+
+def test_the_deploy_blueprint_never_contains_the_key():
+    """render.yaml is committed, so the key must be prompted for, not stored."""
+    import pathlib
+    import re
+
+    text = (pathlib.Path(__file__).resolve().parents[1] / "render.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert "sync: false" in text, "GEMINI_API_KEY must be marked sync:false"
+    # No assignment of an actual value to the key anywhere in the file.
+    assert not re.search(r"GEMINI_API_KEY[\s\S]{0,40}value:", text)
+
+
+def test_the_container_entrypoint_starts_both_and_waits():
+    import pathlib
+
+    script = (pathlib.Path(__file__).resolve().parents[1] / "docker" / "start.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "uvicorn copilot.api:app" in script
+    assert "streamlit run" in script
+    # The UI must not start before the API can answer, or the first page load
+    # races the API and shows the wake-up screen unnecessarily.
+    assert "/health" in script
+    # Render assigns the public port; the API port stays internal.
+    assert "${PORT:-8501}" in script
+    assert "127.0.0.1:${API_PORT}" in script

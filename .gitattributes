@@ -1,0 +1,15 @@
+# Shell scripts and container files MUST keep Unix line endings.
+# On Windows, git would otherwise check start.sh out with CRLF, and Linux
+# then fails with "bad interpreter: /bin/sh^M" - a confusing error that only
+# appears once the image is built, not on the machine that wrote the file.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+.dockerignore   text eol=lf
+
+# Data files are byte-exact: never touch their line endings.
+*.pdf   binary
+*.XLS   binary
+*.xls   binary
+*.parquet binary

@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
+import subprocess
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -134,6 +135,16 @@ def run_case(case: dict, client: GeminiClient) -> CaseResult:
     return result
 
 
+def _code_commit() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, cwd=config.REPO_ROOT, timeout=10,
+        ).stdout.strip() or "unknown"
+    except Exception:  # noqa: BLE001
+        return "unknown"
+
+
 def _error_kinds(failed: list[CaseResult]) -> dict:
     kinds: dict[str, int] = {}
     for result in failed:
@@ -164,6 +175,9 @@ def summarise(results: list[CaseResult]) -> dict:
     coverage = round(100 * len(done) / len(results), 1) if results else 0.0
     return {
         "model": config.GEMINI_MODEL,
+        # Which version of the code produced this. A result is only meaningful
+        # alongside the code that made it.
+        "code_commit": _code_commit(),
         "cases_total": len(results),
         "cases_answered": len(done),
         "cases_errored": len(failed),
@@ -206,8 +220,11 @@ def render(summary: dict, results: list[CaseResult]) -> str:
         f"- Questions: **{summary['cases_total']}** "
         f"({summary['cases_answered']} answered, {summary['cases_errored']} errored)",
         f"- Coverage: **{summary['coverage_pct']}%**",
+        f"- Code version: `{summary.get('code_commit', 'unknown')}`",
         "",
     ]
+    if summary.get("note"):
+        lines += ["> **Run note:** " + summary["note"], ""]
     if not summary["complete"]:
         lines += [
             "> ## INCOMPLETE RUN - THESE NUMBERS ARE NOT REPORTABLE",

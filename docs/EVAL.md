@@ -5,6 +5,9 @@ Produced by `python -m copilot.evaluate` against the real Gemini API. Every numb
 - Model: **gemini-3.5-flash-lite**
 - Questions: **30** (30 answered, 0 errored)
 - Coverage: **100.0%**
+- Code version: `ec1e647`
+
+> **Run note:** **PRE-FIX RUN (2026-09-22).** Recorded before commit 08d7b13, which stopped the checker deleting the student's own rank. Both of the two checker removals below are that false positive, so the 6.7% removal rate reflects checker behaviour that has since been fixed. Kept unchanged rather than re-run, so the improvement is visible as a before/after. A clean post-fix run happens once the app is finished and the code stops changing.
 
 ## Results
 

@@ -275,8 +275,11 @@ def chat_mode(meta: dict, health: dict) -> None:
 
     if not health.get("chat_configured"):
         st.info(
-            "Chat is switched off because no API key is configured. "
-            "**The form tab works without one** and uses the same data.",
+            "**Chat is switched off because the server has no Gemini API key.**\n\n"
+            "Everything on the **Find my options** tab works without one - it "
+            "reads the same official data and never uses AI.\n\n"
+            "*Running this yourself?* Set `GEMINI_API_KEY` in your `.env` file, "
+            "or as an environment variable on your host, and restart.",
             icon="💬",
         )
         return
@@ -375,15 +378,30 @@ def main() -> None:
         if health.get("chat_configured"):
             st.success(f"Chat: on ({health.get('chat_model')})")
         else:
-            st.warning("Chat: off (no API key)")
+            st.warning("Chat: off")
+            st.caption(
+                "No Gemini key is configured on the server, so the chat tab is "
+                "disabled. Everything on the form tab works without it."
+            )
         st.caption(f"Data year: {meta['data_year']}")
-        st.caption(f"API: {API_URL}")
+        st.success("Backend: connected")
         st.divider()
         st.caption(
             "The form reads the official table directly. The chat is a "
             "convenience on top of it, and the form keeps working when the "
             "chat cannot."
         )
+        # The API address is an implementation detail. On the deployed site it
+        # is 127.0.0.1 INSIDE the container, which is correct but meaningless
+        # to a visitor and reads as broken. Keep it for whoever is debugging,
+        # out of the way of everyone else.
+        with st.expander("Technical details"):
+            st.caption(f"API base URL (internal): `{API_URL}`")
+            st.caption(f"Exam: {health.get('exam_state')} EAPCET")
+            st.caption(
+                "The API runs inside this same container and is not exposed "
+                "publicly. The interface calls it over HTTP on localhost."
+            )
 
     form_tab, chat_tab = st.tabs(["Find my options", "Ask a question"])
     with form_tab:

@@ -172,6 +172,35 @@ def band_caption(band: str, accuracy: dict) -> str:
     return f"correct {value}% of the time for students in your category last year"
 
 
+def render_chat_recommendations(recommendations: list) -> None:
+    """Show the options the agent returned.
+
+    The agent answers with prose AND a structured list. Rendering only the
+    prose meant a reply saying "here are some options" was followed by
+    nothing at all - the list was returned, checked, and then silently
+    dropped by the interface.
+    """
+    if not recommendations:
+        return
+    order = {"Safe": 0, "Moderate": 1, "Reach": 2}
+    for band in ("Safe", "Moderate", "Reach"):
+        rows = [r for r in recommendations if r.get("band") == band]
+        if not rows:
+            continue
+        st.markdown(
+            f"**<span style='color:{BAND_COLOUR[band]}'>{band}</span>**",
+            unsafe_allow_html=True,
+        )
+        for r in rows:
+            name = r.get("branch_name") or r.get("branch_code")
+            rank = r.get("closing_rank")
+            closed = f"closed at **{rank:,}**" if rank else "closing rank not available"
+            st.markdown(
+                f"- **{r.get('college_name')}** `{r.get('college_code')}` - "
+                f"{name} `{r.get('branch_code')}` - {closed} in {r.get('data_year')}"
+            )
+
+
 def render_options(result: dict) -> None:
     totals = result.get("total_options_per_band", {})
     shown = result.get("showing_per_band")
@@ -297,6 +326,7 @@ def chat_mode(meta: dict, health: dict) -> None:
     for m in st.session_state.messages:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
+            render_chat_recommendations(m.get("recommendations") or [])
             if m.get("removed"):
                 with st.expander(f"The checker removed {len(m['removed'])} item(s)"):
                     for item in m["removed"]:
@@ -333,6 +363,7 @@ def chat_mode(meta: dict, health: dict) -> None:
             return
 
         st.markdown(data["reply"])
+        render_chat_recommendations(data.get("recommendations") or [])
         if data.get("sc_warning_shown"):
             st.caption("The SC warning above is included because the bands are untested for SC.")
         st.caption(
@@ -346,7 +377,12 @@ def chat_mode(meta: dict, health: dict) -> None:
                     st.markdown(f"- **{item['kind']}** `{item['value']}` - {item['reason']}")
 
         st.session_state.messages.append(
-            {"role": "assistant", "content": data["reply"], "removed": data.get("removed")}
+            {
+                "role": "assistant",
+                "content": data["reply"],
+                "removed": data.get("removed"),
+                "recommendations": data.get("recommendations") or [],
+            }
         )
 
 

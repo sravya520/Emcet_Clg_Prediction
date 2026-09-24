@@ -291,3 +291,30 @@ def test_bad_model_is_reported_to_the_ui_as_such(monkeypatch):
     assert body["ok"] is False
     assert body["error_kind"] == "bad_model"
     assert body["form_still_works"] is True
+
+
+def test_the_chat_ui_renders_the_recommendations_it_receives():
+    """The agent answers with prose AND a structured list. Rendering only the
+    prose meant a reply saying "here are some options" was followed by nothing:
+    the list was returned, checked, then dropped by the interface."""
+    import inspect
+
+    from copilot import ui
+
+    source = inspect.getsource(ui)
+    assert "def render_chat_recommendations" in source
+    # Called for a fresh answer and when replaying history.
+    assert source.count("render_chat_recommendations(") >= 3
+
+
+def test_the_agent_is_told_to_honour_a_requested_count():
+    from copilot.agent.loop import SYSTEM_PROMPT
+
+    assert "per_band" in SYSTEM_PROMPT
+    assert "top 10" in SYSTEM_PROMPT.lower()
+
+
+def test_the_agent_is_told_not_to_describe_options_only_in_prose():
+    from copilot.agent.loop import SYSTEM_PROMPT
+
+    assert "recommendations` array" in SYSTEM_PROMPT or "recommendations array" in SYSTEM_PROMPT

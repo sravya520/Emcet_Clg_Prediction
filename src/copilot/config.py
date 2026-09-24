@@ -51,6 +51,14 @@ GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 #: Stop the loop after this many tool round-trips and force a final answer.
 MAX_AGENT_STEPS: int = int(os.getenv("MAX_AGENT_STEPS", "5"))
 
+#: Which build is running. Render supplies RENDER_GIT_COMMIT automatically.
+#: Without this there is no way to tell from the outside whether a deploy has
+#: actually landed, which turned a two-minute question ("is my fix live?") into
+#: guesswork from the wording of an error message.
+APP_COMMIT: str = (
+    os.getenv("RENDER_GIT_COMMIT", "") or os.getenv("APP_COMMIT", "") or "unknown"
+)[:7]
+
 
 def missing_llm_settings() -> list[str]:
     """Which LLM settings are absent. Names only - never values.

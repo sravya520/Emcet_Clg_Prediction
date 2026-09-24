@@ -404,6 +404,7 @@ def main() -> None:
         # to a visitor and reads as broken. Keep it for whoever is debugging,
         # out of the way of everyone else.
         with st.expander("Technical details"):
+            st.caption(f"Build: `{health.get('build', 'unknown')}`")
             st.caption(f"API base URL (internal): `{API_URL}`")
             st.caption(f"Exam: {health.get('exam_state')} EAPCET")
             st.caption(

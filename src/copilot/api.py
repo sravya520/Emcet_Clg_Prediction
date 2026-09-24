@@ -99,6 +99,7 @@ def health() -> dict:
         # Which settings are absent, by NAME. Never the values.
         "chat_missing_settings": config.missing_llm_settings(),
         "chat_model": config.GEMINI_MODEL or None,
+        "build": config.APP_COMMIT,
         "form_available": True,
     }
 

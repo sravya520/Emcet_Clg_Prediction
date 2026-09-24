@@ -203,3 +203,54 @@ def test_the_sc_warning_text_says_what_it_should():
     assert "could not be tested" in text
     assert "sc" in text
     assert "less reliable" in text
+
+
+# --- Repeatability ----------------------------------------------------------
+
+
+def test_the_same_input_twice_gives_an_identical_answer(cutoffs):
+    """A student who reloads must not see a different shortlist.
+
+    Nothing here is random, but that is a property worth pinning: a future
+    change that introduced sampling, or relied on dict ordering, would be
+    invisible until someone noticed their results moving.
+    """
+    import pandas as pd
+
+    first = recommend(45_000, "BC-B", "GIRLS", "AU", cutoffs=cutoffs, thresholds=T)
+    second = recommend(45_000, "BC-B", "GIRLS", "AU", cutoffs=cutoffs, thresholds=T)
+    pd.testing.assert_frame_equal(first, second)
+
+
+def test_repeatable_across_many_inputs(cutoffs):
+    for rank, category, gender, area in [
+        (1_000, "OC", "BOYS", "AU"),
+        (45_000, "SC-I", "GIRLS", "SVU"),
+        (120_000, "ST", "BOYS", "AU"),
+        (180_000, "BC-C", "GIRLS", "SVU"),
+    ]:
+        a = recommend(rank, category, gender, area, cutoffs=cutoffs, thresholds=T)
+        b = recommend(rank, category, gender, area, cutoffs=cutoffs, thresholds=T)
+        assert a.equals(b), f"not repeatable for {rank} {category} {gender} {area}"
+
+
+# --- The high-rank tail -----------------------------------------------------
+
+
+@pytest.mark.parametrize("rank", [120_000, 150_000, 180_000])
+@pytest.mark.parametrize(
+    "category", ["OC", "OC-EWS", "BC-A", "BC-B", "BC-C", "BC-D", "BC-E", "SC-I", "SC-II", "SC-III", "ST"]
+)
+def test_a_very_high_rank_never_produces_a_silent_blank(cutoffs, rank, category):
+    """Nobody should meet an empty screen with no explanation.
+
+    Either there are options, or the tool must return a note saying why not.
+    """
+    from copilot.agent import tools
+
+    result = tools.recommend_options(rank, category, "BOYS", "AU", per_band=3)
+    has_options = bool(result.get("options"))
+    has_explanation = bool(result.get("note") or result.get("error"))
+    assert has_options or has_explanation, (
+        f"{category} at rank {rank}: no options AND no explanation"
+    )

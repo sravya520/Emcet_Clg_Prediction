@@ -235,6 +235,38 @@ form never touches the AI.
 
 ---
 
+## Fairness and reliability audit
+
+An overall accuracy figure can hide a group the system serves badly, so the same
+2024 → 2025 hold-out was re-run split by category and gender, with the sample
+size beside every number. Full audit: **[docs/FAIRNESS.md](docs/FAIRNESS.md)**.
+
+**What it found:**
+
+| | |
+|---|---|
+| **BC-C is measurably worse served** | Safe **93.9%** vs 97–99% for every other category, **a third as many options** (298 vs ~920), and **67.8% of its cutoffs blank** |
+| **OC-EWS is also thin** | 45.5% of cutoffs blank |
+| **SC cannot be measured at all** | The 2025 sub-classification means the hold-out contains **zero** SC pairs |
+| **Gender: no meaningful gap** | Boys 97.6 / 67.2 / 33.2 vs girls 97.9 / 68.1 / 34.6 — under a point apart |
+| **AI language: clean** | Six answers varying only category, then only gender. **No discouraging or patronising language**, and 6/6 carried the same kinds of information |
+| **Repeatable and no dead ends** | Identical input gives identical output; all 33 high-rank combinations return options, none blank |
+
+**What changed as a result:** the app now shows a thin-data warning for BC-C and
+OC-EWS, read from the measured results rather than hardcoded.
+
+**What did not:** per-category thresholds are **recommended for BC-C and OC only**
+but **not implemented**, pending a decision. Every category has enough data
+(1.26–1.8M tuning pairs), but only those two differ enough from the shared limits
+to be worth nine separate sets of numbers — and one category's separately-tuned
+threshold came out as an artefact of the search boundary, which is itself an
+argument against adopting them mechanically.
+
+**The girls-may-take-boys-seats rule was verified word-for-word** in the 2023,
+2024 and 2025 statements (`4.Girls are also eligible for Boys seats.`). It is
+**absent from 2022**, which carries no disclaimer block at all; 2022 is never used
+for recommendations.
+
 ## Limitations
 
 Read these before trusting anything here.
@@ -257,8 +289,19 @@ Read these before trusting anything here.
   **45% of colleges** inside a single official fee block period, so carrying a
   2024 fee into a 2025 recommendation would be wrong for nearly half of them.
 - **SC bands are untested.** 2025 split SC into SC-I/II/III, so 2024 SC rows have
-  no like-for-like successor and the hold-out could not test them. Every SC
-  answer carries a warning saying so.
+  no like-for-like successor and the hold-out contains **zero** SC pairs. Every SC
+  answer carries a warning saying so — but a warning is not a measurement.
+- **BC-C students are served worse, and it cannot be fully fixed.** 93.9% Safe
+  accuracy against 97–99% elsewhere, and about a third of the options, because
+  67.8% of BC-C cutoffs are blank. The app now warns them. The sparsity itself is
+  a fact about how few BC-C candidates were admitted, and no amount of
+  engineering changes that.
+- **Accuracy is pooled across regions.** AU and SVU are not broken out.
+- **Only one hold-out year exists.** Every accuracy figure rests on a single
+  2024 → 2025 comparison; consistency across years is unknown.
+- **The tone check is phrase matching, not comprehension.** It catches a model
+  that turns discouraging when it sees a category; it cannot detect subtler
+  condescension, and six answers is a small sample.
 - **Special reservation categories are absent** — PWD, NCC, Sports, CAP, Scouts
   & Guides — because the source statements exclude them too.
 - **AP only.** `EXAM_STATE` is config, so TG EAPCET could be added, but nothing
@@ -331,6 +374,8 @@ docker compose up --build
 ```bash
 python -m copilot.engine.backtest    # the Safe/Moderate/Reach numbers
 python -m copilot.evaluate --pause 15 # the 30 agent questions (needs a key)
+python -m copilot.engine.fairness     # the per-group fairness audit
+python -m copilot.tone_check          # the AI language check (needs a key)
 python -m copilot.data.spotcheck 10   # 10 random rows vs the source PDFs
 pytest                                # 160 tests, all offline
 ```
@@ -355,4 +400,5 @@ evals/       cases.jsonl · results.json
 **Documentation:** [DESIGN.md](docs/DESIGN.md) (decisions and why) ·
 [BACKTEST.md](docs/BACKTEST.md) (how the bands were measured) ·
 [EVAL.md](docs/EVAL.md) (how the agent scored) ·
+[FAIRNESS.md](docs/FAIRNESS.md) (does it work equally well for everyone) ·
 [CLAUDE.md](CLAUDE.md) (the rules this project was built under)

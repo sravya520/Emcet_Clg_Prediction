@@ -1,0 +1,915 @@
+{
+  "overall": {
+    "Safe": {
+      "accuracy_pct": 97.8,
+      "pairs": 6434923
+    },
+    "Moderate": {
+      "accuracy_pct": 67.7,
+      "pairs": 2974029
+    },
+    "Reach": {
+      "accuracy_pct": 33.9,
+      "pairs": 1070841
+    }
+  },
+  "by_category": {
+    "BC-A": {
+      "Safe": {
+        "accuracy_pct": 98.0,
+        "pairs": 994713
+      },
+      "Moderate": {
+        "accuracy_pct": 66.9,
+        "pairs": 451860
+      },
+      "Reach": {
+        "accuracy_pct": 30.1,
+        "pairs": 135413
+      }
+    },
+    "BC-B": {
+      "Safe": {
+        "accuracy_pct": 98.4,
+        "pairs": 1009731
+      },
+      "Moderate": {
+        "accuracy_pct": 69.4,
+        "pairs": 452311
+      },
+      "Reach": {
+        "accuracy_pct": 33.0,
+        "pairs": 124646
+      }
+    },
+    "BC-C": {
+      "Safe": {
+        "accuracy_pct": 93.9,
+        "pairs": 265115
+      },
+      "Moderate": {
+        "accuracy_pct": 68.4,
+        "pairs": 131265
+      },
+      "Reach": {
+        "accuracy_pct": 48.4,
+        "pairs": 81280
+      }
+    },
+    "BC-D": {
+      "Safe": {
+        "accuracy_pct": 98.4,
+        "pairs": 954904
+      },
+      "Moderate": {
+        "accuracy_pct": 68.5,
+        "pairs": 432355
+      },
+      "Reach": {
+        "accuracy_pct": 34.2,
+        "pairs": 134032
+      }
+    },
+    "BC-E": {
+      "Safe": {
+        "accuracy_pct": 97.0,
+        "pairs": 946605
+      },
+      "Moderate": {
+        "accuracy_pct": 62.5,
+        "pairs": 444925
+      },
+      "Reach": {
+        "accuracy_pct": 34.7,
+        "pairs": 160155
+      }
+    },
+    "OC": {
+      "Safe": {
+        "accuracy_pct": 97.9,
+        "pairs": 661008
+      },
+      "Moderate": {
+        "accuracy_pct": 66.4,
+        "pairs": 329292
+      },
+      "Reach": {
+        "accuracy_pct": 27.3,
+        "pairs": 208782
+      }
+    },
+    "OC-EWS": {
+      "Safe": {
+        "accuracy_pct": 99.0,
+        "pairs": 479487
+      },
+      "Moderate": {
+        "accuracy_pct": 75.8,
+        "pairs": 232579
+      },
+      "Reach": {
+        "accuracy_pct": 34.5,
+        "pairs": 114725
+      }
+    },
+    "ST": {
+      "Safe": {
+        "accuracy_pct": 97.6,
+        "pairs": 1123360
+      },
+      "Moderate": {
+        "accuracy_pct": 67.5,
+        "pairs": 499442
+      },
+      "Reach": {
+        "accuracy_pct": 39.2,
+        "pairs": 111808
+      }
+    }
+  },
+  "by_gender": {
+    "BOYS": {
+      "Safe": {
+        "accuracy_pct": 97.6,
+        "pairs": 2935669
+      },
+      "Moderate": {
+        "accuracy_pct": 67.2,
+        "pairs": 1373472
+      },
+      "Reach": {
+        "accuracy_pct": 33.2,
+        "pairs": 535037
+      }
+    },
+    "GIRLS": {
+      "Safe": {
+        "accuracy_pct": 97.9,
+        "pairs": 3499254
+      },
+      "Moderate": {
+        "accuracy_pct": 68.1,
+        "pairs": 1600557
+      },
+      "Reach": {
+        "accuracy_pct": 34.6,
+        "pairs": 535804
+      }
+    }
+  },
+  "by_category_and_gender": {
+    "BC-A / BOYS": {
+      "Safe": {
+        "accuracy_pct": 97.7,
+        "pairs": 461110
+      },
+      "Moderate": {
+        "accuracy_pct": 65.6,
+        "pairs": 213025
+      },
+      "Reach": {
+        "accuracy_pct": 29.2,
+        "pairs": 69156
+      }
+    },
+    "BC-A / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 98.3,
+        "pairs": 533603
+      },
+      "Moderate": {
+        "accuracy_pct": 68.0,
+        "pairs": 238835
+      },
+      "Reach": {
+        "accuracy_pct": 31.1,
+        "pairs": 66257
+      }
+    },
+    "BC-B / BOYS": {
+      "Safe": {
+        "accuracy_pct": 98.3,
+        "pairs": 466852
+      },
+      "Moderate": {
+        "accuracy_pct": 68.1,
+        "pairs": 212034
+      },
+      "Reach": {
+        "accuracy_pct": 31.8,
+        "pairs": 64589
+      }
+    },
+    "BC-B / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 98.4,
+        "pairs": 542879
+      },
+      "Moderate": {
+        "accuracy_pct": 70.4,
+        "pairs": 240277
+      },
+      "Reach": {
+        "accuracy_pct": 34.2,
+        "pairs": 60057
+      }
+    },
+    "BC-C / BOYS": {
+      "Safe": {
+        "accuracy_pct": 94.1,
+        "pairs": 104096
+      },
+      "Moderate": {
+        "accuracy_pct": 72.0,
+        "pairs": 51585
+      },
+      "Reach": {
+        "accuracy_pct": 53.4,
+        "pairs": 34896
+      }
+    },
+    "BC-C / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 93.8,
+        "pairs": 161019
+      },
+      "Moderate": {
+        "accuracy_pct": 66.1,
+        "pairs": 79680
+      },
+      "Reach": {
+        "accuracy_pct": 44.6,
+        "pairs": 46384
+      }
+    },
+    "BC-D / BOYS": {
+      "Safe": {
+        "accuracy_pct": 98.2,
+        "pairs": 441250
+      },
+      "Moderate": {
+        "accuracy_pct": 67.2,
+        "pairs": 202426
+      },
+      "Reach": {
+        "accuracy_pct": 33.1,
+        "pairs": 67823
+      }
+    },
+    "BC-D / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 98.5,
+        "pairs": 513654
+      },
+      "Moderate": {
+        "accuracy_pct": 69.5,
+        "pairs": 229929
+      },
+      "Reach": {
+        "accuracy_pct": 35.3,
+        "pairs": 66209
+      }
+    },
+    "BC-E / BOYS": {
+      "Safe": {
+        "accuracy_pct": 96.7,
+        "pairs": 429330
+      },
+      "Moderate": {
+        "accuracy_pct": 61.8,
+        "pairs": 204238
+      },
+      "Reach": {
+        "accuracy_pct": 34.1,
+        "pairs": 81581
+      }
+    },
+    "BC-E / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 97.3,
+        "pairs": 517275
+      },
+      "Moderate": {
+        "accuracy_pct": 63.0,
+        "pairs": 240687
+      },
+      "Reach": {
+        "accuracy_pct": 35.4,
+        "pairs": 78574
+      }
+    },
+    "OC / BOYS": {
+      "Safe": {
+        "accuracy_pct": 98.0,
+        "pairs": 295357
+      },
+      "Moderate": {
+        "accuracy_pct": 67.6,
+        "pairs": 147956
+      },
+      "Reach": {
+        "accuracy_pct": 25.3,
+        "pairs": 99827
+      }
+    },
+    "OC / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 97.8,
+        "pairs": 365651
+      },
+      "Moderate": {
+        "accuracy_pct": 65.5,
+        "pairs": 181336
+      },
+      "Reach": {
+        "accuracy_pct": 29.1,
+        "pairs": 108955
+      }
+    },
+    "OC-EWS / BOYS": {
+      "Safe": {
+        "accuracy_pct": 99.1,
+        "pairs": 219373
+      },
+      "Moderate": {
+        "accuracy_pct": 76.9,
+        "pairs": 107584
+      },
+      "Reach": {
+        "accuracy_pct": 34.2,
+        "pairs": 56718
+      }
+    },
+    "OC-EWS / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 98.8,
+        "pairs": 260114
+      },
+      "Moderate": {
+        "accuracy_pct": 74.9,
+        "pairs": 124995
+      },
+      "Reach": {
+        "accuracy_pct": 34.8,
+        "pairs": 58007
+      }
+    },
+    "ST / BOYS": {
+      "Safe": {
+        "accuracy_pct": 97.2,
+        "pairs": 518301
+      },
+      "Moderate": {
+        "accuracy_pct": 66.5,
+        "pairs": 234624
+      },
+      "Reach": {
+        "accuracy_pct": 38.5,
+        "pairs": 60447
+      }
+    },
+    "ST / GIRLS": {
+      "Safe": {
+        "accuracy_pct": 98.0,
+        "pairs": 605059
+      },
+      "Moderate": {
+        "accuracy_pct": 68.5,
+        "pairs": 264818
+      },
+      "Reach": {
+        "accuracy_pct": 40.0,
+        "pairs": 51361
+      }
+    }
+  },
+  "coverage_by_category": [
+    {
+      "category": "BC-A",
+      "rows": 3218,
+      "ranks_present": 3031,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 5.8
+    },
+    {
+      "category": "BC-B",
+      "rows": 3218,
+      "ranks_present": 3026,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 6.0
+    },
+    {
+      "category": "BC-C",
+      "rows": 3218,
+      "ranks_present": 1036,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 67.8
+    },
+    {
+      "category": "BC-D",
+      "rows": 3218,
+      "ranks_present": 3028,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 5.9
+    },
+    {
+      "category": "BC-E",
+      "rows": 3218,
+      "ranks_present": 2982,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 7.3
+    },
+    {
+      "category": "OC",
+      "rows": 3218,
+      "ranks_present": 2942,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 8.6
+    },
+    {
+      "category": "OC-EWS",
+      "rows": 3218,
+      "ranks_present": 1755,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 45.5
+    },
+    {
+      "category": "SC-I",
+      "rows": 3218,
+      "ranks_present": 2955,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 8.2
+    },
+    {
+      "category": "SC-II",
+      "rows": 3218,
+      "ranks_present": 3029,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 5.9
+    },
+    {
+      "category": "SC-III",
+      "rows": 3218,
+      "ranks_present": 3039,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 5.6
+    },
+    {
+      "category": "ST",
+      "rows": 3218,
+      "ranks_present": 3025,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 6.0
+    }
+  ],
+  "coverage_by_gender": [
+    {
+      "gender": "BOYS",
+      "rows": 17699,
+      "ranks_present": 14123,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 20.2
+    },
+    {
+      "gender": "GIRLS",
+      "rows": 17699,
+      "ranks_present": 15725,
+      "colleges": 274,
+      "branches": 73,
+      "missing_pct": 11.2
+    }
+  ],
+  "options_for_a_typical_student": [
+    {
+      "category": "BC-A",
+      "gender": "BOYS",
+      "20000": 923,
+      "60000": 853,
+      "100000": 787,
+      "150000": 683
+    },
+    {
+      "category": "BC-A",
+      "gender": "GIRLS",
+      "20000": 1024,
+      "60000": 952,
+      "100000": 890,
+      "150000": 799
+    },
+    {
+      "category": "BC-B",
+      "gender": "BOYS",
+      "20000": 919,
+      "60000": 856,
+      "100000": 788,
+      "150000": 707
+    },
+    {
+      "category": "BC-B",
+      "gender": "GIRLS",
+      "20000": 1022,
+      "60000": 956,
+      "100000": 895,
+      "150000": 821
+    },
+    {
+      "category": "BC-C",
+      "gender": "BOYS",
+      "20000": 298,
+      "60000": 269,
+      "100000": 218,
+      "150000": 165
+    },
+    {
+      "category": "BC-C",
+      "gender": "GIRLS",
+      "20000": 421,
+      "60000": 375,
+      "100000": 310,
+      "150000": 239
+    },
+    {
+      "category": "BC-D",
+      "gender": "BOYS",
+      "20000": 917,
+      "60000": 821,
+      "100000": 744,
+      "150000": 632
+    },
+    {
+      "category": "BC-D",
+      "gender": "GIRLS",
+      "20000": 1022,
+      "60000": 925,
+      "100000": 841,
+      "150000": 741
+    },
+    {
+      "category": "BC-E",
+      "gender": "BOYS",
+      "20000": 907,
+      "60000": 846,
+      "100000": 782,
+      "150000": 676
+    },
+    {
+      "category": "BC-E",
+      "gender": "GIRLS",
+      "20000": 1022,
+      "60000": 963,
+      "100000": 904,
+      "150000": 798
+    },
+    {
+      "category": "OC",
+      "gender": "BOYS",
+      "20000": 856,
+      "60000": 726,
+      "100000": 607,
+      "150000": 433
+    },
+    {
+      "category": "OC",
+      "gender": "GIRLS",
+      "20000": 981,
+      "60000": 837,
+      "100000": 715,
+      "150000": 530
+    },
+    {
+      "category": "OC-EWS",
+      "gender": "BOYS",
+      "20000": 550,
+      "60000": 476,
+      "100000": 415,
+      "150000": 326
+    },
+    {
+      "category": "OC-EWS",
+      "gender": "GIRLS",
+      "20000": 612,
+      "60000": 534,
+      "100000": 469,
+      "150000": 375
+    },
+    {
+      "category": "SC-I",
+      "gender": "BOYS",
+      "20000": 885,
+      "60000": 809,
+      "100000": 728,
+      "150000": 598
+    },
+    {
+      "category": "SC-I",
+      "gender": "GIRLS",
+      "20000": 1011,
+      "60000": 950,
+      "100000": 871,
+      "150000": 736
+    },
+    {
+      "category": "SC-II",
+      "gender": "BOYS",
+      "20000": 940,
+      "60000": 901,
+      "100000": 872,
+      "150000": 806
+    },
+    {
+      "category": "SC-II",
+      "gender": "GIRLS",
+      "20000": 1048,
+      "60000": 1013,
+      "100000": 985,
+      "150000": 933
+    },
+    {
+      "category": "SC-III",
+      "gender": "BOYS",
+      "20000": 948,
+      "60000": 896,
+      "100000": 836,
+      "150000": 768
+    },
+    {
+      "category": "SC-III",
+      "gender": "GIRLS",
+      "20000": 1049,
+      "60000": 1000,
+      "100000": 948,
+      "150000": 882
+    },
+    {
+      "category": "ST",
+      "gender": "BOYS",
+      "20000": 938,
+      "60000": 915,
+      "100000": 883,
+      "150000": 822
+    },
+    {
+      "category": "ST",
+      "gender": "GIRLS",
+      "20000": 1045,
+      "60000": 1028,
+      "100000": 1000,
+      "150000": 946
+    }
+  ],
+  "high_rank_tail": [
+    {
+      "category": "BC-A",
+      "rank": 120000,
+      "options": 749,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-A",
+      "rank": 150000,
+      "options": 683,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-A",
+      "rank": 180000,
+      "options": 613,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-B",
+      "rank": 120000,
+      "options": 750,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-B",
+      "rank": 150000,
+      "options": 707,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-B",
+      "rank": 180000,
+      "options": 634,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-C",
+      "rank": 120000,
+      "options": 194,
+      "most_lenient_cutoff_in_group": 179058,
+      "explained": true
+    },
+    {
+      "category": "BC-C",
+      "rank": 150000,
+      "options": 165,
+      "most_lenient_cutoff_in_group": 179058,
+      "explained": true
+    },
+    {
+      "category": "BC-C",
+      "rank": 180000,
+      "options": 122,
+      "most_lenient_cutoff_in_group": 179058,
+      "explained": true
+    },
+    {
+      "category": "BC-D",
+      "rank": 120000,
+      "options": 698,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-D",
+      "rank": 150000,
+      "options": 632,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-D",
+      "rank": 180000,
+      "options": 574,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-E",
+      "rank": 120000,
+      "options": 745,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-E",
+      "rank": 150000,
+      "options": 676,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "BC-E",
+      "rank": 180000,
+      "options": 587,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "OC",
+      "rank": 120000,
+      "options": 533,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "OC",
+      "rank": 150000,
+      "options": 433,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "OC",
+      "rank": 180000,
+      "options": 339,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "OC-EWS",
+      "rank": 120000,
+      "options": 373,
+      "most_lenient_cutoff_in_group": 179144,
+      "explained": true
+    },
+    {
+      "category": "OC-EWS",
+      "rank": 150000,
+      "options": 326,
+      "most_lenient_cutoff_in_group": 179144,
+      "explained": true
+    },
+    {
+      "category": "OC-EWS",
+      "rank": 180000,
+      "options": 283,
+      "most_lenient_cutoff_in_group": 179144,
+      "explained": true
+    },
+    {
+      "category": "SC-I",
+      "rank": 120000,
+      "options": 675,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-I",
+      "rank": 150000,
+      "options": 598,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-I",
+      "rank": 180000,
+      "options": 516,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-II",
+      "rank": 120000,
+      "options": 843,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-II",
+      "rank": 150000,
+      "options": 806,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-II",
+      "rank": 180000,
+      "options": 727,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "SC-III",
+      "rank": 120000,
+      "options": 809,
+      "most_lenient_cutoff_in_group": 180151,
+      "explained": true
+    },
+    {
+      "category": "SC-III",
+      "rank": 150000,
+      "options": 768,
+      "most_lenient_cutoff_in_group": 180151,
+      "explained": true
+    },
+    {
+      "category": "SC-III",
+      "rank": 180000,
+      "options": 701,
+      "most_lenient_cutoff_in_group": 180151,
+      "explained": true
+    },
+    {
+      "category": "ST",
+      "rank": 120000,
+      "options": 870,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "ST",
+      "rank": 150000,
+      "options": 822,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    },
+    {
+      "category": "ST",
+      "rank": 180000,
+      "options": 750,
+      "most_lenient_cutoff_in_group": 180147,
+      "explained": true
+    }
+  ],
+  "thin_categories": [
+    "BC-C",
+    "OC-EWS"
+  ],
+  "thresholds": {
+    "t_safe": 0.76,
+    "t_moderate": 1.15,
+    "t_max": 1.51
+  },
+  "thin_category_rule": "A category is flagged thin when more than 40% of its cutoff cells are blank. Row COUNT is useless as a measure here: the table is dense by construction so every category has identical row counts."
+}

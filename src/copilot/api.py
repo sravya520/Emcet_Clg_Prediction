@@ -116,6 +116,7 @@ def meta() -> dict:
         "girls_rule": bands["girls_rule"],
         "sc_warning": banding.SC_WARNING,
         "source_disclaimer": bands["source_disclaimer"],
+        "thin_data_categories": sorted(tools.THIN_DATA_CATEGORIES),
         "branch_names_are_unofficial": True,
         "branch_name_note": (
             "No official list of branch code to branch name exists in any "

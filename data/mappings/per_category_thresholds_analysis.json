@@ -1,0 +1,65 @@
+[
+  {
+    "category": "BC-A",
+    "tuning_pairs": 1782720,
+    "t_safe": 0.83,
+    "t_moderate": 1.16,
+    "t_max": 1.53
+  },
+  {
+    "category": "BC-B",
+    "tuning_pairs": 1777680,
+    "t_safe": 0.86,
+    "t_moderate": 1.16,
+    "t_max": 1.54
+  },
+  {
+    "category": "BC-C",
+    "tuning_pairs": 1640880,
+    "t_safe": 0.6,
+    "t_moderate": 1.04,
+    "t_max": 1.59
+  },
+  {
+    "category": "BC-D",
+    "tuning_pairs": 1775520,
+    "t_safe": 0.77,
+    "t_moderate": 1.16,
+    "t_max": 1.49
+  },
+  {
+    "category": "BC-E",
+    "tuning_pairs": 1749600,
+    "t_safe": 0.75,
+    "t_moderate": 1.13,
+    "t_max": 1.6
+  },
+  {
+    "category": "OC",
+    "tuning_pairs": 1715760,
+    "t_safe": 0.61,
+    "t_moderate": 0.99,
+    "t_max": 1.22
+  },
+  {
+    "category": "OC-EWS",
+    "tuning_pairs": 1259280,
+    "t_safe": 0.82,
+    "t_moderate": 1.14,
+    "t_max": 1.44
+  },
+  {
+    "category": "SC",
+    "tuning_pairs": 1800720,
+    "t_safe": 0.94,
+    "t_moderate": 1.18,
+    "t_max": 1.51
+  },
+  {
+    "category": "ST",
+    "tuning_pairs": 1773360,
+    "t_safe": 0.84,
+    "t_moderate": 1.16,
+    "t_max": 2.57
+  }
+]

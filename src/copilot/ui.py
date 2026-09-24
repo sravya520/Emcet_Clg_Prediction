@@ -232,6 +232,8 @@ def form_mode(meta: dict, filters: dict) -> None:
         return
 
     show_sc_warning_if_needed(category, meta)
+    if result.get("thin_data_for_category"):
+        st.warning(result["thin_data_warning"], icon="📉")
     render_options(result)
 
 
@@ -360,4 +362,9 @@ def main() -> None:
         chat_mode(meta, health)
 
 
-main()
+# Guarded, so importing this module does not execute the whole app. Streamlit
+# runs the script as __main__, so the app still starts normally; without the
+# guard, `import copilot.ui` in a test tried to render the page and crashed
+# when no API was listening.
+if __name__ == "__main__":
+    main()

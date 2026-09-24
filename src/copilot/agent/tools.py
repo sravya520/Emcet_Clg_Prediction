@@ -33,6 +33,34 @@ OUT_OF_SCOPE = {
     "admission_process": "counselling dates, documents or the admission process",
 }
 
+#: Categories where most cutoff cells are blank, so there is simply less
+#: evidence behind each answer. Measured, not assumed - see
+#: data/mappings/fairness_results.json and docs/FAIRNESS.md.
+THIN_DATA_CATEGORIES: dict[str, float] = {}
+
+
+def _load_thin_categories() -> dict[str, float]:
+    """Read the measured thin categories, if the fairness audit has been run."""
+    path = config.MAPPINGS_DIR / "fairness_results.json"
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    missing = {
+        row["category"]: row["missing_pct"] for row in data.get("coverage_by_category", [])
+    }
+    return {c: missing.get(c, 0.0) for c in data.get("thin_categories", [])}
+
+
+THIN_DATA_CATEGORIES = _load_thin_categories()
+
+THIN_DATA_WARNING = (
+    "Heads up: {category} has fewer published cutoffs than other categories - "
+    "{missing:.0f}% of its entries are blank, because few {category} candidates "
+    "were admitted to those college-branch combinations. The options below are "
+    "still built from official data, but there is less evidence behind them than "
+    "for a larger category."
+)
+
 _CUTOFFS: pd.DataFrame | None = None
 
 
@@ -175,6 +203,15 @@ def recommend_options(
         "band_untested_for_category": bool(result["band_untested_for_category"].iloc[0]),
         "warning": (
             banding.SC_WARNING if result["band_untested_for_category"].iloc[0] else None
+        ),
+        "thin_data_for_category": normalise_category(category) in THIN_DATA_CATEGORIES,
+        "thin_data_warning": (
+            THIN_DATA_WARNING.format(
+                category=normalise_category(category),
+                missing=THIN_DATA_CATEGORIES[normalise_category(category)],
+            )
+            if normalise_category(category) in THIN_DATA_CATEGORIES
+            else None
         ),
         "options": _records(
             shown,

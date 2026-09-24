@@ -148,6 +148,10 @@ ERROR_KINDS = {
         "Chat is switched off because no API key is configured. The search form "
         "works without one."
     ),
+    "bad_model": (
+        "The chat is misconfigured: the server's model name was rejected by the "
+        "API. The search form still works and needs no model."
+    ),
     "other": (
         "Something went wrong with the chat. The search form still works and "
         "uses the same data."
@@ -164,6 +168,14 @@ def classify_error(message: str) -> str:
         return "auth"
     if "missing gemini_api_key" in text or "missing gemini_model" in text:
         return "not_configured"
+    # A rejected model name. Worth its own kind: it looks like a generic
+    # failure but the cause is a single wrong setting, and the fix is obvious
+    # once named. A trailing space in the model name causes exactly this.
+    if "invalid_argument" in text or "not_found" in text or "404" in text:
+        if "model" in text:
+            return "bad_model"
+    if "400" in text and "model" in text:
+        return "bad_model"
     if "503" in text or "unavailable" in text or "overloaded" in text or "500" in text:
         return "unavailable"
     if "connect" in text or "dns" in text or "ssl" in text or "timeout" in text:

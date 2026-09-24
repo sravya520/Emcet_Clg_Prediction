@@ -18,7 +18,18 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
 # --- Exam / state -----------------------------------------------------------
 # AP only for now. TG EAPCET would be added as a second state, not by editing
 # the pipeline: the raw manifest and the mapping files are per-state.
-EXAM_STATE: str = os.getenv("EXAM_STATE", "AP")
+def _setting(name: str, default: str = "") -> str:
+    """Read an environment variable, trimmed.
+
+    Values pasted into a hosting dashboard often carry a trailing space or
+    newline that is invisible in the form field. An untrimmed model name
+    produces a 400 from the API with no obvious cause, so every setting is
+    stripped at the point of reading rather than trusted.
+    """
+    return os.getenv(name, default).strip()
+
+
+EXAM_STATE: str = _setting("EXAM_STATE", "AP")
 
 # The year whose closing ranks are used to make live recommendations.
 # Earlier years exist for the backtest only.
@@ -45,8 +56,8 @@ BACKTEST_RESULTS: Path = MAPPINGS_DIR / "backtest_results.json"
 
 # --- LLM --------------------------------------------------------------------
 # Never hardcode a model id, and never print the key. See CLAUDE.md.
-GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "")
-GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL: str = _setting("GEMINI_MODEL")
+GEMINI_API_KEY: str = _setting("GEMINI_API_KEY")
 
 #: Stop the loop after this many tool round-trips and force a final answer.
 MAX_AGENT_STEPS: int = int(os.getenv("MAX_AGENT_STEPS", "5"))

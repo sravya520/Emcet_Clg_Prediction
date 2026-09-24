@@ -42,13 +42,9 @@ and is published below.
 
 ---
 
-## Screenshot
+## Demo
 
-<!-- TODO: replace with a real screenshot or GIF of the live app.
-     Suggested: the form tab showing 104 Safe / 10 Moderate / 3 Reach for
-     rank 34000, OC, boys, AU, CSE. Save to docs/screenshot.png. -->
-
-![The form mode showing Safe, Moderate and Reach options](docs/screenshot.png)
+![Counselling Copilot in use: entering a rank and category, and getting options grouped Safe, Moderate and Reach](docs/Clg_predictions_Animation.gif)
 
 ---
 

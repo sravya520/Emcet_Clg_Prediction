@@ -219,7 +219,12 @@ def chat(request: ChatRequest) -> JSONResponse:
 
     if turn.error:
         kind = classify_error(turn.error)
-        log.warning("chat failed (%s)", kind)
+        # For a kind we recognise, the name is enough. For "other" it is not:
+        # logging only the label left an unclassified failure undiagnosable.
+        if kind == "other":
+            log.warning("chat failed, unclassified: %s", turn.error[:400])
+        else:
+            log.warning("chat failed (%s)", kind)
         return JSONResponse(
             {"ok": False, "error_kind": kind, "message": ERROR_KINDS[kind],
              "form_still_works": True}

@@ -244,3 +244,50 @@ def test_health_never_reveals_the_value_only_the_name(monkeypatch):
     monkeypatch.setattr(config, "GEMINI_MODEL", "", raising=False)
     body = client.get("/health").json()
     assert secret not in str(body)
+
+
+# --- A pasted setting with invisible whitespace ------------------------------
+
+
+def test_settings_are_stripped(monkeypatch):
+    """A value pasted into a hosting dashboard can carry a trailing space or
+    newline that is invisible in the form field. An untrimmed model name
+    produces a 400 from the API with no obvious cause."""
+    import importlib
+
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-3.5-flash-lite \n")
+    monkeypatch.setenv("GEMINI_API_KEY", "  a-key  ")
+    importlib.reload(config)
+    try:
+        assert config.GEMINI_MODEL == "gemini-3.5-flash-lite"
+        assert config.GEMINI_API_KEY == "a-key"
+    finally:
+        importlib.reload(config)
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "400 INVALID_ARGUMENT. GenerateContentRequest.model: unexpected model name",
+        "404 NOT_FOUND. models/gemini-nope is not found for API version v1",
+    ],
+)
+def test_a_rejected_model_name_is_its_own_error_kind(message):
+    """It looks like a generic failure, but the cause is one wrong setting."""
+    assert classify_error(message) == "bad_model"
+    assert "model name" in ERROR_KINDS["bad_model"]
+    assert "form" in ERROR_KINDS["bad_model"].lower()
+
+
+def test_bad_model_is_reported_to_the_ui_as_such(monkeypatch):
+    def explode(*_args, **_kwargs):
+        raise RuntimeError("400 INVALID_ARGUMENT GenerateContentRequest.model: bad")
+
+    monkeypatch.setattr("copilot.agent.loop.ask", explode)
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "present", raising=False)
+    monkeypatch.setattr(config, "GEMINI_MODEL", "bad ", raising=False)
+
+    body = client.post("/chat", json={"message": "hi"}).json()
+    assert body["ok"] is False
+    assert body["error_kind"] == "bad_model"
+    assert body["form_still_works"] is True

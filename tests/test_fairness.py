@@ -137,3 +137,88 @@ def test_girls_never_get_fewer_options_than_boys(cutoffs):
         boys = recommend(45_000, category, "BOYS", "AU", cutoffs=cutoffs)
         girls = recommend(45_000, category, "GIRLS", "AU", cutoffs=cutoffs)
         assert len(girls) >= len(boys), category
+
+
+# --- Per-category accuracy shown to the student -----------------------------
+
+
+def test_accuracy_is_read_from_the_measured_file_not_hardcoded():
+    """If the audit is re-run with different numbers, the app must follow."""
+    import json
+
+    measured = json.loads(
+        (config.MAPPINGS_DIR / "fairness_results.json").read_text(encoding="utf-8")
+    )["by_category"]
+    for category, bands in measured.items():
+        shown = tools.band_accuracy_for(category)
+        for band, values in bands.items():
+            assert shown[band] == values["accuracy_pct"], f"{category}/{band}"
+
+
+def test_a_measured_category_reports_its_own_number_not_the_average():
+    """BC-C is 93.9% on Safe. It must never be told the 97.8% overall figure."""
+    assert tools.band_accuracy_for("BC-C")["Safe"] == 93.9
+    assert tools.band_accuracy_for("OC")["Reach"] == 27.3
+
+
+@pytest.mark.parametrize("category", ["SC", "SC-I", "SC-II", "SC-III"])
+def test_sc_categories_report_that_accuracy_is_unmeasured(category):
+    """Never borrow another group's accuracy for a group we could not measure."""
+    assert tools.band_accuracy_for(category) == {
+        "Safe": None, "Moderate": None, "Reach": None
+    }
+
+
+@pytest.mark.parametrize("category", ["SC-I", "BC-C", "OC"])
+def test_recommend_carries_the_accuracy_for_that_category(category):
+    result = tools.recommend_options(45_000, category, "BOYS", "AU", per_band=2)
+    assert "band_accuracy" in result
+    assert set(result["band_accuracy"]) == {"Safe", "Moderate", "Reach"}
+    expected = tools.band_accuracy_for(category)
+    assert result["band_accuracy"] == expected
+
+
+def test_the_ui_caption_says_unmeasured_rather_than_a_number():
+    from copilot.ui import band_caption
+
+    unmeasured = band_caption("Safe", {"Safe": None})
+    assert "could not be measured" in unmeasured
+    assert "%" not in unmeasured
+
+    measured = band_caption("Safe", {"Safe": 93.9})
+    assert "93.9%" in measured
+
+
+# --- Special-category quotas ------------------------------------------------
+
+
+def test_the_special_quota_notice_names_every_excluded_quota():
+    """These students are outside the data entirely, not merely underserved."""
+    text = tools.SPECIAL_QUOTA_NOTICE.lower()
+    for quota in ("pwd", "ncc", "sports", "cap", "scouts", "minority"):
+        assert quota in text, f"{quota} not named in the notice"
+    assert "does not cover" in text
+
+
+def test_the_notice_travels_with_every_recommendation():
+    result = tools.recommend_options(45_000, "OC", "BOYS", "AU", per_band=2)
+    assert result["special_quota_notice"] == tools.SPECIAL_QUOTA_NOTICE
+
+
+def test_the_agent_is_told_to_mention_both():
+    from copilot.agent.loop import SYSTEM_PROMPT
+
+    assert "band_accuracy" in SYSTEM_PROMPT
+    assert "special_quota_notice" in SYSTEM_PROMPT
+    assert "could not be measured" in SYSTEM_PROMPT
+
+
+def test_the_ui_shows_the_quota_notice_at_warning_weight():
+    """As prominent as the SC warning: st.warning, not a caption."""
+    import inspect
+
+    from copilot import ui
+
+    source = inspect.getsource(ui.show_special_quota_notice)
+    assert "st.warning" in source
+    assert "Not covered" in source

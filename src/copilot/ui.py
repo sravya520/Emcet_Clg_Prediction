@@ -145,9 +145,37 @@ def show_sc_warning_if_needed(category: str, meta: dict) -> None:
         st.warning(f"**Heads up for SC candidates.** {meta['sc_warning']}", icon="⚠️")
 
 
+def show_special_quota_notice(meta: dict) -> None:
+    """Shown to everyone, at the same weight as the SC warning.
+
+    A student admitted under one of these quotas is not merely less well
+    served by this tool - they are outside its data entirely, because the
+    source statements exclude them. That deserves the same prominence as any
+    other warning, not a footnote.
+    """
+    st.warning(
+        f"**Not covered: special-category quotas.** {meta['special_quota_notice']}",
+        icon="🚫",
+    )
+
+
+def band_caption(band: str, accuracy: dict) -> str:
+    """The measured accuracy for this student's own category, not an average.
+
+    Read from the fairness results. Where a category could not be measured -
+    SC and its sub-categories - we say so rather than quoting another group's
+    number at them.
+    """
+    value = (accuracy or {}).get(band)
+    if value is None:
+        return "accuracy could not be measured for this category"
+    return f"correct {value}% of the time for students in your category last year"
+
+
 def render_options(result: dict) -> None:
     totals = result.get("total_options_per_band", {})
     shown = result.get("showing_per_band")
+    accuracy = result.get("band_accuracy") or {}
 
     cols = st.columns(3)
     for col, band in zip(cols, ("Safe", "Moderate", "Reach")):
@@ -172,6 +200,7 @@ def render_options(result: dict) -> None:
             f"({totals.get(band, 0)} total)</span>",
             unsafe_allow_html=True,
         )
+        st.caption(f"**{band}** - {band_caption(band, accuracy)}")
         for o in rows:
             name = o.get("branch_name") or o["branch_code"]
             unofficial = " *(unofficial name)*" if o.get("branch_name") else ""
@@ -232,6 +261,7 @@ def form_mode(meta: dict, filters: dict) -> None:
         return
 
     show_sc_warning_if_needed(category, meta)
+    show_special_quota_notice(meta)
     if result.get("thin_data_for_category"):
         st.warning(result["thin_data_warning"], icon="📉")
     render_options(result)

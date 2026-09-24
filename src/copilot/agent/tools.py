@@ -53,6 +53,45 @@ def _load_thin_categories() -> dict[str, float]:
 
 THIN_DATA_CATEGORIES = _load_thin_categories()
 
+#: Per-category band accuracy, measured on the 2024 -> 2025 hold-out. Read from
+#: the fairness results rather than hardcoded, so re-running the audit updates
+#: what the app tells students. Empty until the audit has been run.
+BAND_ACCURACY_BY_CATEGORY: dict[str, dict[str, float | None]] = {}
+
+
+def _load_band_accuracy() -> dict[str, dict[str, float | None]]:
+    path = config.MAPPINGS_DIR / "fairness_results.json"
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        category: {band: v.get("accuracy_pct") for band, v in bands.items()}
+        for category, bands in data.get("by_category", {}).items()
+    }
+
+
+BAND_ACCURACY_BY_CATEGORY = _load_band_accuracy()
+
+#: Said whenever a category has no measured accuracy. SC and its
+#: sub-categories are the real case: the 2025 split left the hold-out with
+#: zero SC pairs, so there is nothing to report and saying "97.8%" at them
+#: would be borrowing another group's number.
+ACCURACY_NOT_MEASURED = "could not be measured for this category"
+
+#: Quotas this tool does not cover at all. The source statements exclude them,
+#: so a student admitted under one of these will find our numbers do not
+#: describe their situation. This has to be as prominent as the SC warning:
+#: a student in one of these categories is not merely less well served, they
+#: are outside the data entirely.
+SPECIAL_QUOTA_NOTICE = (
+    "This tool does not cover special-category quotas. The official last-rank "
+    "statements exclude candidates admitted under PWD (persons with disability), "
+    "NCC, Sports and Games, CAP (children of armed personnel), Scouts and Guides, "
+    "and minority college quotas. If you are applying under any of these, the "
+    "closing ranks here do not describe your case - check with the counselling "
+    "authority instead."
+)
+
 THIN_DATA_WARNING = (
     "Heads up: {category} has fewer published cutoffs than other categories - "
     "{missing:.0f}% of its entries are blank, because few {category} candidates "
@@ -116,6 +155,14 @@ def normalise_category(category: str) -> str:
     """Turn 'bcb', 'BC B', 'BC-B' into the table's 'BC-B'."""
     key = str(category).upper().replace(" ", "").replace(".", "")
     return CATEGORY_ALIASES.get(key, key)
+
+
+def band_accuracy_for(category: str) -> dict[str, float | None]:
+    """Measured accuracy per band for one category, or nulls if unmeasurable."""
+    measured = BAND_ACCURACY_BY_CATEGORY.get(normalise_category(category))
+    if not measured:
+        return {"Safe": None, "Moderate": None, "Reach": None}
+    return measured
 
 
 def _records(frame: pd.DataFrame, columns: list[str]) -> list[dict]:
@@ -204,6 +251,12 @@ def recommend_options(
         "warning": (
             banding.SC_WARNING if result["band_untested_for_category"].iloc[0] else None
         ),
+        "band_accuracy": band_accuracy_for(category),
+        "band_accuracy_note": (
+            "How often each band was right for THIS category on the 2024->2025 "
+            "hold-out. Null means it could not be measured."
+        ),
+        "special_quota_notice": SPECIAL_QUOTA_NOTICE,
         "thin_data_for_category": normalise_category(category) in THIN_DATA_CATEGORIES,
         "thin_data_warning": (
             THIN_DATA_WARNING.format(

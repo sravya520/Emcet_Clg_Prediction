@@ -252,15 +252,26 @@ size beside every number. Full audit: **[docs/FAIRNESS.md](docs/FAIRNESS.md)**.
 | **AI language: clean** | Six answers varying only category, then only gender. **No discouraging or patronising language**, and 6/6 carried the same kinds of information |
 | **Repeatable and no dead ends** | Identical input gives identical output; all 33 high-rank combinations return options, none blank |
 
-**What changed as a result:** the app now shows a thin-data warning for BC-C and
-OC-EWS, read from the measured results rather than hardcoded.
+**What changed as a result:**
 
-**What did not:** per-category thresholds are **recommended for BC-C and OC only**
-but **not implemented**, pending a decision. Every category has enough data
-(1.26–1.8M tuning pairs), but only those two differ enough from the shared limits
-to be worth nine separate sets of numbers — and one category's separately-tuned
-threshold came out as an artefact of the search boundary, which is itself an
-argument against adopting them mechanically.
+- **Each band shows its accuracy for your own category**, read from the audit's
+  results file rather than hardcoded — *"Safe — correct 93.9% of the time for
+  students in your category last year"*. **SC categories are told the accuracy
+  could not be measured**, rather than being shown another group's number.
+- **A thin-data warning** for BC-C and OC-EWS.
+- **The special-category quota exclusion is stated at the same prominence as the
+  SC warning** — PWD, NCC, Sports, CAP, Scouts & Guides and minority colleges are
+  excluded by the source statements, so students applying under those routes are
+  outside this data entirely.
+
+**Decision: no per-category thresholds; the shared limits stay.** Three reasons:
+only BC-C and OC differ meaningfully (the other seven are within ±0.10); ST's
+separately-tuned upper bound of 2.57 is a **search-boundary artefact** that would
+show ST students options at twice last year's closing rank; and the 2024 → 2025
+fold has already been used to *measure* these gaps, so tuning new thresholds and
+validating them on the same fold would be fitting and testing on one dataset.
+**Revisit after the 2026 statement**, which provides a genuinely unused validation
+year and lets SC be compared with itself for the first time.
 
 **The girls-may-take-boys-seats rule was verified word-for-word** in the 2023,
 2024 and 2025 statements (`4.Girls are also eligible for Boys seats.`). It is
@@ -302,8 +313,13 @@ Read these before trusting anything here.
 - **The tone check is phrase matching, not comprehension.** It catches a model
   that turns discouraging when it sees a category; it cannot detect subtler
   condescension, and six answers is a small sample.
-- **Special reservation categories are absent** — PWD, NCC, Sports, CAP, Scouts
-  & Guides — because the source statements exclude them too.
+- **Special-category quotas are absent** — PWD, NCC, Sports and Games, CAP,
+  Scouts & Guides and minority colleges — because the source statements exclude
+  them. A student admitted under one of those is outside this data entirely, not
+  merely underserved. The app now says so at the same prominence as the SC
+  warning, but that is disclosure, not coverage.
+- **Per-category thresholds are deliberately not implemented.** BC-C and OC would
+  benefit; there is no unused validation year to prove it on until 2026.
 - **AP only.** `EXAM_STATE` is config, so TG EAPCET could be added, but nothing
   has been built or evaluated for it.
 - **Colleges churn.** Roughly 30 appear and 30 disappear between any two years,

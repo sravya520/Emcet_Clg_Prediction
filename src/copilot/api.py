@@ -117,6 +117,9 @@ def meta() -> dict:
         "sc_warning": banding.SC_WARNING,
         "source_disclaimer": bands["source_disclaimer"],
         "thin_data_categories": sorted(tools.THIN_DATA_CATEGORIES),
+        "band_accuracy_by_category": tools.BAND_ACCURACY_BY_CATEGORY,
+        "accuracy_not_measured_note": tools.ACCURACY_NOT_MEASURED,
+        "special_quota_notice": tools.SPECIAL_QUOTA_NOTICE,
         "branch_names_are_unofficial": True,
         "branch_name_note": (
             "No official list of branch code to branch name exists in any "

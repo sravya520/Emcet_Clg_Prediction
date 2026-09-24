@@ -117,16 +117,40 @@ finding, and shipping it would show ST students options at more than twice last
 year's closing rank. **This alone is a reason not to adopt per-category
 thresholds mechanically.**
 
-### Recommendation (not implemented — your decision)
+### DECISION (2026-09-24): no per-category thresholds. Shared limits stay.
 
-Per-category thresholds for **BC-C and OC only**, leaving everything else on the
-shared limits, and with an explicit sanity bound so no category can be handed a
-`t_max` like ST's 2.57. That fixes the two real gaps without nine separate
-explanations.
+Three reasons, recorded so the choice can be revisited on evidence rather than
+re-argued from scratch:
 
-Honest cost: nine sets of thresholds are harder to describe to a student than
-one, and every extra tuned parameter is another thing fitted to 2023 → 2024 that
-may not hold in 2026. **Nothing has been changed.**
+1. **Only two of nine categories differ meaningfully.** BC-C and OC want
+   materially tighter limits; the other seven land within ±0.10 of the shared
+   values. Nine sets of numbers to explain, to fix two.
+2. **ST's 2.57 upper bound is a search-boundary artefact**, not a finding. The
+   tuner never found where ST's Reach accuracy fell below 20%, so it ran to the
+   top of the grid. Any procedure that can emit that number needs a guard before
+   it is trusted, and a procedure needing a guard is not ready to ship.
+3. **There is no clean year left to validate on.** The 2024 → 2025 fold has
+   already been used to *measure* these gaps. Tuning new thresholds and then
+   testing them on the same fold would be fitting and validating on one dataset -
+   exactly the mistake the two-fold design exists to prevent. New thresholds
+   would have no honest accuracy figure to publish.
+
+**Revisit after the 2026 statement is published.** That gives a genuinely unused
+validation year, and lets SC-I / SC-II / SC-III be compared with themselves for
+the first time. Per-category thresholds are a good candidate then - for BC-C and
+OC, with a sanity bound on `t_max`.
+
+### What was done instead
+
+Two changes, both about telling students the truth rather than changing the maths:
+
+1. **Each band now shows its accuracy for the student's own category**, read from
+   this audit's results file rather than hardcoded. A BC-C student sees
+   *"Safe - correct 93.9% of the time for students in your category last year"*,
+   not the 97.8% overall figure. **For SC categories it says the accuracy could
+   not be measured**, rather than borrowing another group's number.
+2. **The special-category quota exclusion is now stated as prominently as the SC
+   warning** (§9).
 
 ## 4. Data coverage per group
 
@@ -324,7 +348,47 @@ Stated plainly, because an audit that only reports good news is not an audit.
 4. **Only one hold-out year exists.** Every figure here rests on a single
    2024 → 2025 comparison. Consistency across years is unknown.
 5. **Local area is not broken out.** All accuracy figures pool AU and SVU.
-6. **Special reservation categories are entirely absent** — PWD, NCC, Sports,
-   CAP, Scouts & Guides — because the source statements exclude them. Students in
-   those categories are not served at all, and the app does not currently say so
-   as loudly as it says the SC warning.
+6. **Special-category quotas are entirely absent** — PWD, NCC, Sports and Games,
+   CAP, Scouts & Guides, and minority colleges — because the source statements
+   exclude them. **Addressed as far as it can be:** the app now says so at the
+   same weight as the SC warning (§9). It remains a gap in the *data*, which no
+   amount of interface work closes.
+7. **Per-category thresholds are deliberately not implemented** (§3). BC-C and OC
+   would benefit; there is no unused validation year to prove it on.
+8. **The tone check is phrase matching, not comprehension**, on six answers. It
+   catches a model that turns discouraging when it sees a category; it cannot
+   detect subtler condescension that avoids every listed phrase.
+9. **Accuracy is measured against whether a rank would have been enough**, not
+   whether the student would have been offered or accepted that seat.
+
+
+## 9. Special-category quotas: stated, not buried
+
+The source statements say, in their own disclaimer:
+
+> "Last rank statement does not reflect the candidates admitted in special
+> reservation categories like PWD, NCC, Sports and Games, Children of Armed
+> Personnel (CAP), Scouts & guides & Minority colleges."
+
+A student admitted under one of those is **not merely less well served by this
+tool — they are outside its data entirely.** Every number here describes the
+general pool they are not in.
+
+That is now shown to **every** user of the form, at `st.warning` weight, the same
+prominence as the SC warning:
+
+> **Not covered: special-category quotas.** This tool does not cover
+> special-category quotas. The official last-rank statements exclude candidates
+> admitted under PWD (persons with disability), NCC, Sports and Games, CAP
+> (children of armed personnel), Scouts and Guides, and minority college quotas.
+> If you are applying under any of these, the closing ranks here do not describe
+> your case — check with the counselling authority instead.
+
+The agent is instructed to include it too whenever a student mentions any of
+those routes. Five tests pin the wording, the prominence, and that it travels
+with every recommendation.
+
+**Why at warning weight rather than a footnote:** a caveat a student does not
+read is a caveat that does not exist. Someone applying under the sports quota who
+takes these cutoffs at face value is being actively misled, and the cost of
+over-warning everyone else is a single line they can skim.

@@ -52,16 +52,30 @@ GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 MAX_AGENT_STEPS: int = int(os.getenv("MAX_AGENT_STEPS", "5"))
 
 
+def missing_llm_settings() -> list[str]:
+    """Which LLM settings are absent. Names only - never values.
+
+    Chat needs BOTH a key and a model name. An earlier version reported any
+    failure as "no API key", which was actively misleading when the key was
+    present and the model name was not: it sent someone hunting for a problem
+    with a key that was fine.
+    """
+    return [
+        name
+        for name, value in (
+            ("GEMINI_API_KEY", GEMINI_API_KEY),
+            ("GEMINI_MODEL", GEMINI_MODEL),
+        )
+        if not value
+    ]
+
+
 def require_llm_settings() -> tuple[str, str]:
     """Return (api_key, model) or explain exactly what is missing.
 
     Deliberately never includes the key itself in any message it raises.
     """
-    missing = [
-        name
-        for name, value in (("GEMINI_API_KEY", GEMINI_API_KEY), ("GEMINI_MODEL", GEMINI_MODEL))
-        if not value
-    ]
+    missing = missing_llm_settings()
     if missing:
         raise RuntimeError(
             f"Missing {' and '.join(missing)}. Copy .env.example to .env and fill it in. "

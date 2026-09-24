@@ -278,8 +278,10 @@ def chat_mode(meta: dict, health: dict) -> None:
             "**Chat is switched off because the server has no Gemini API key.**\n\n"
             "Everything on the **Find my options** tab works without one - it "
             "reads the same official data and never uses AI.\n\n"
-            "*Running this yourself?* Set `GEMINI_API_KEY` in your `.env` file, "
-            "or as an environment variable on your host, and restart.",
+            "*Running this yourself?* Set the missing variable(s) shown in the "
+            "sidebar - in your `.env` file locally, or as environment variables "
+            "on your host - and restart. Chat needs **both** `GEMINI_API_KEY` "
+            "and `GEMINI_MODEL`.",
             icon="💬",
         )
         return
@@ -378,11 +380,17 @@ def main() -> None:
         if health.get("chat_configured"):
             st.success(f"Chat: on ({health.get('chat_model')})")
         else:
+            missing = health.get("chat_missing_settings") or []
             st.warning("Chat: off")
-            st.caption(
-                "No Gemini key is configured on the server, so the chat tab is "
-                "disabled. Everything on the form tab works without it."
-            )
+            if missing:
+                st.caption(
+                    "Not set on the server: " + ", ".join(f"`{m}`" for m in missing)
+                    + ". Everything on the form tab works without them."
+                )
+            else:
+                st.caption(
+                    "The chat is unavailable. Everything on the form tab still works."
+                )
         st.caption(f"Data year: {meta['data_year']}")
         st.success("Backend: connected")
         st.divider()

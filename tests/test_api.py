@@ -209,3 +209,38 @@ def test_the_api_root_explains_itself_instead_of_404ing():
     assert "not the app" in body["note"]
     assert "8501" in body["the_app_is_at"]
     assert "POST /recommend" in body["endpoints"]
+
+
+def test_health_names_which_llm_setting_is_missing(monkeypatch):
+    """"No API key" was misleading when the key was present and the model
+    name was not. It sent someone hunting for a problem with a good key."""
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "present", raising=False)
+    monkeypatch.setattr(config, "GEMINI_MODEL", "", raising=False)
+
+    body = client.get("/health").json()
+    assert body["chat_configured"] is False
+    assert body["chat_missing_settings"] == ["GEMINI_MODEL"]
+    # The key is present, so it must NOT be blamed.
+    assert "GEMINI_API_KEY" not in body["chat_missing_settings"]
+
+
+def test_health_names_a_missing_key_too(monkeypatch):
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "", raising=False)
+    monkeypatch.setattr(config, "GEMINI_MODEL", "some-model", raising=False)
+    body = client.get("/health").json()
+    assert body["chat_missing_settings"] == ["GEMINI_API_KEY"]
+
+
+def test_health_names_both_when_both_are_missing(monkeypatch):
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "", raising=False)
+    monkeypatch.setattr(config, "GEMINI_MODEL", "", raising=False)
+    body = client.get("/health").json()
+    assert body["chat_missing_settings"] == ["GEMINI_API_KEY", "GEMINI_MODEL"]
+
+
+def test_health_never_reveals_the_value_only_the_name(monkeypatch):
+    secret = "super-secret-key-value"
+    monkeypatch.setattr(config, "GEMINI_API_KEY", secret, raising=False)
+    monkeypatch.setattr(config, "GEMINI_MODEL", "", raising=False)
+    body = client.get("/health").json()
+    assert secret not in str(body)

@@ -95,7 +95,9 @@ def health() -> dict:
         "data_year": config.RECOMMEND_YEAR,
         "exam_state": config.EXAM_STATE,
         # Whether a key is PRESENT, never what it is.
-        "chat_configured": bool(config.GEMINI_API_KEY and config.GEMINI_MODEL),
+        "chat_configured": not config.missing_llm_settings(),
+        # Which settings are absent, by NAME. Never the values.
+        "chat_missing_settings": config.missing_llm_settings(),
         "chat_model": config.GEMINI_MODEL or None,
         "form_available": True,
     }

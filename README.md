@@ -303,6 +303,15 @@ Read these before trusting anything here.
   67.8% of BC-C cutoffs are blank. The app now warns them. The sparsity itself is
   a fact about how few BC-C candidates were admitted, and no amount of
   engineering changes that.
+- **The backtest percentages carry no confidence interval.** Each figure counts
+  student-option pairs from 720 simulated ranks (every 250th rank) against the
+  college-branch options shown. Pairs that share a student rank or an option are
+  not independent, so the very large counts do not translate into a tight error
+  bar, and no interval was computed.
+- **The checker once removed something that was not wrong.** The one removal in
+  the 30-question run (`o03`) was the college code `ADIT`, which the student had
+  typed in their own question. It was left in the published run rather than
+  re-run, and is recorded in `docs/EVAL.md`.
 - **Accuracy is pooled across regions.** AU and SVU are not broken out.
 - **Only one hold-out year exists.** Every accuracy figure rests on a single
   2024 → 2025 comparison; consistency across years is unknown.
@@ -389,8 +398,21 @@ python -m copilot.evaluate --pause 15 # the 30 agent questions (needs a key)
 python -m copilot.engine.fairness     # the per-group fairness audit
 python -m copilot.tone_check          # the AI language check (needs a key)
 python -m copilot.data.spotcheck 10   # 10 random rows vs the source PDFs
-pytest                                # 160 tests, all offline
+pytest                                # all offline, no API key
 ```
+
+**Tests need the processed table first.** `data/processed/*` is git-ignored, so on
+a fresh clone run `python -m copilot.data.ingest` and
+`python -m copilot.data.validate` (above) before `pytest`; without them about 100
+tests fail or error with `FileNotFoundError`. Recorded result, 2026-11-12, on a
+clean export of commit `becc83f` with Python 3.11, after those two commands and
+with no API key set: **233 collected, 232 passed, 1 skipped, 0 failed**. The skip
+is `tests/test_banding.py:189` ("no options for SC at this rank"), which depends
+on the data. The ingest step wrote 117,838 rows and the regenerated
+`validation_report.md` was identical to the committed one. The count changes as
+tests are added, so rerun the command rather than trusting this figure. The same
+steps run in `.github/workflows/ci.yml`; the live-API commands above
+(`copilot.evaluate`, `copilot.tone_check`) are not part of CI.
 
 ---
 
